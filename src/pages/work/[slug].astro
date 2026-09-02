@@ -71,6 +71,8 @@ const preload = await getImage({
 <Base
   title={`${artwork.data.title} — A Life Of Sunshine`}
   description={artwork.data.altText ?? `${artwork.data.title}, by Sunshine Kiara Bhandary.`}
+  ogImage={`/og/${artwork.id}.jpg`}
+  ogType="article"
 >
   <link
     slot="head"

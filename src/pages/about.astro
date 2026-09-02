@@ -6,13 +6,13 @@
  * Me"). Nothing here is written for her. It lives in src/content/pages/about.md so she can edit
  * it through /admin.
  *
- * The seal at 200px that §13 calls for is not here yet: §9.6 requires it to be traced from the
- * book sheet and approved by Sunshine before it ships, so the wordmark lockup stands in — which
- * is the fallback §7.8 already specifies for the mark.
+ * The seal is her actual artwork with its sage field keyed out, not a trace (see
+ * scripts/build-brand-assets.mjs). §9.6's traced SVG replaces it when she approves one.
  */
 import { Image } from 'astro:assets';
 import { getEntry, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import Seal from '../components/Seal.astro';
 
 const about = await getEntry('page', 'about');
 if (!about) throw new Error('src/content/pages/about.md is missing');
@@ -52,9 +52,10 @@ const press = about.data.press ?? [];
       </div>
     </div>
 
-    {/* §13 — the seal at 200px goes here once the trace is approved (§9.6). */}
+    {/* §13 — the seal at 200px, centred, with wordmark-sub beneath. aria-hidden because her
+        name is already in the text above (§10.3). */}
     <div class="about__lockup">
-      <span class="wordmark">A Life Of Sunshine</span>
+      <Seal width={200} decorative={true} />
       <span class="wordmark__sub">Sunshine · Kiara · Bhandary</span>
     </div>
 

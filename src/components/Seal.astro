@@ -1,0 +1,41 @@
+---
+/**
+ * Her seal — DESIGN-SYSTEM.md §7.9, §9.6, §13.
+ *
+ * §9.6: "The full seal is never rendered below 120px wide anywhere on the site — its ink drawing
+ * turns to mud. It appears here [the footer], on /about at 200px, and on the OG image."
+ * Below 120px the simplified mark is meant to be used instead, and that mark still needs tracing
+ * and her approval, so this component refuses small sizes rather than shipping mud.
+ *
+ * This is her actual artwork with the sage field keyed out (scripts/build-brand-assets.mjs), not
+ * a trace. §9.6's traced SVG with currentColor strokes replaces it once she approves one.
+ */
+import { Image } from 'astro:assets';
+import seal from '../assets/seal.png';
+
+interface Props {
+  /** Rendered width in px. §9.6 forbids anything under 120. */
+  width: number;
+  /** §10.3 — labelled in the footer, hidden on /about where the name is already in text. */
+  decorative?: boolean;
+}
+const { width, decorative = false } = Astro.props;
+
+if (width < 120) {
+  throw new Error(
+    `Seal rendered at ${width}px. §9.6: the full seal is never rendered below 120px — use the simplified mark.`,
+  );
+}
+---
+<Image
+  class="seal"
+  src={seal}
+  alt={decorative ? '' : 'A Life Of Sunshine'}
+  aria-hidden={decorative ? 'true' : undefined}
+  role={decorative ? undefined : 'img'}
+  width={width}
+  height={Math.round((width * seal.height) / seal.width)}
+  densities={[1, 2]}
+  loading="lazy"
+  decoding="async"
+/>

@@ -33,9 +33,14 @@ const instagram = settings?.data.instagram ?? 'a_life_of_sunshine';
       ) : (
         <>
           {upcoming.length > 0 && (
-            <div class="events" style="margin-top: var(--space-6);">
-              {upcoming.map((e) => <EventCard event={e} />)}
-            </div>
+            <section style="margin-top: var(--space-6);">
+              {/* §7.5 shows no visible UPCOMING heading — only a PAST rule — but the event
+                  titles are h3, so without an h2 here the document skipped h1 -> h3. */}
+              <h2 class="visually-hidden">Upcoming</h2>
+              <div class="events">
+                {upcoming.map((e) => <EventCard event={e} />)}
+              </div>
+            </section>
           )}
 
           {past.length > 0 && (

@@ -124,8 +124,18 @@ export function detailLabel(art: Artwork): string | null {
  */
 export function cardAlt(art: Artwork): string {
   if (art.data.altText) return art.data.altText;
-  const label = cardLabel(art);
-  return label ? `${art.data.title}, ${label.toLowerCase()}` : art.data.title;
+  /**
+   * Empty, deliberately. §10.3's reasoning for the card is that "the title is adjacent visible
+   * text inside the same link, so it is not repeated in `alt`" — and the card already carries
+   * the title in a visually-hidden span, which is what names the link. Its stated fallback of
+   * `"{title}, {medium label}"` therefore announces the title twice; Lighthouse flags exactly
+   * that as `image-redundant-alt`, and it cost a point on /work. An empty alt makes the image
+   * decorative and leaves the hidden title as the single accessible name, which loses nothing
+   * because the fallback added no information the title did not already carry.
+   *
+   * Once she fills in `altText` this branch stops being reached and the image describes itself.
+   */
+  return '';
 }
 
 export function detailAlt(art: Artwork): string {

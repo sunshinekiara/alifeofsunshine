@@ -1,0 +1,64 @@
+---
+/**
+ * /policies — DESIGN-SYSTEM.md §13.
+ *
+ * "Three `heading` sections from `siteConfig.policies.{shipping,returns,damage}`, each omitted if
+ * empty. The `ships worldwide` vs `India only` line renders from `shippingRegions`; the build
+ * fails if `shippingRegions` is unset, because that page must not guess."
+ *
+ * The schema already makes `shippingRegions` required, so a missing value fails content
+ * validation before this page renders. The explicit throw is here so the reason is obvious if it
+ * ever does happen.
+ */
+import { getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const settings = await getEntry('siteConfig', 'site');
+if (!settings) throw new Error('siteConfig is missing');
+
+const { shippingRegions, processingTime, policies, instagram } = settings.data;
+if (!shippingRegions) {
+  throw new Error(
+    '/policies cannot be built without siteConfig.shippingRegions — §13 says this page must not guess.',
+  );
+}
+
+const sections = [
+  { heading: 'Shipping', body: policies?.shipping },
+  { heading: 'Returns', body: policies?.returns },
+  { heading: 'Damaged in transit', body: policies?.damage },
+].filter((s) => Boolean(s.body && s.body.trim()));
+---
+
+<Base
+  title="Policies — A Life Of Sunshine"
+  description="Shipping, returns and damage claims."
+>
+  <div class="container container--text section">
+    <h1 class="display-2">Policies</h1>
+
+    <p class="body-lg measure" style="margin-top: var(--space-5);">
+      ships {shippingRegions}{processingTime ? `, ready in ${processingTime}` : ''}.
+    </p>
+
+    {
+      sections.map((s) => (
+        <section style="margin-top: var(--section-gap);">
+          <h2 class="heading">{s.heading}</h2>
+          <div class="prose body measure" style="margin-top: var(--space-4);" set:html={
+            s.body!.split(/\n{2,}/).map((p) => `<p>${p.trim()}</p>`).join('')
+          } />
+        </section>
+      ))
+    }
+
+    <section style="margin-top: var(--section-gap);">
+      <h2 class="heading">Questions</h2>
+      <p class="body measure" style="margin-top: var(--space-4);">
+        dm me on instagram —{' '}
+        <a href={`https://www.instagram.com/${instagram}/`} rel="noopener">@{instagram}</a>{' '}
+        — or use the <a href="/contact">contact form</a>.
+      </p>
+    </section>
+  </div>
+</Base>

@@ -35,6 +35,7 @@ const instagram = settings?.data.instagram ?? 'a_life_of_sunshine';
 <Base
   title="Commissions — A Life Of Sunshine"
   description="Custom canvas, pet portraits and story pieces. You send a photo; she paints the person in it."
+  ogImage={caseStudies[0]?.data.finalArtwork ? `/og/${caseStudies[0].data.finalArtwork.id}.jpg` : undefined}
 >
   <div class="container section">
     <h1 class="display-2">Commissions</h1>

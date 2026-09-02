@@ -44,7 +44,10 @@ const greeting = hero.greeting ?? 'hi, i’m sunshine. i paint people, pets and 
 const line = hero.line ?? 'scroll down for the work — dms are open if you want something made for someone you love.';
 ---
 
-<Base title="A Life Of Sunshine — canvas & digital artist, Bangalore">
+<Base
+  title="A Life Of Sunshine — canvas & digital artist, Bangalore"
+  ogImage={heroArtwork ? `/og/${heroArtwork.id}.jpg` : undefined}
+>
   {/* ---- 2. Hero. §13 `painting` variant, the §14.3 default. No sage anywhere near it. ---- */}
   <section class="hero container">
     <div class="hero__grid">

@@ -5,6 +5,7 @@
 // (`npm run fonts:sync`) but their CSS is deliberately NOT imported — it names the
 // families "... Variable", which never matched the token stacks. See fonts.css.
 import { getEntry } from 'astro:content';
+import Seal from '../components/Seal.astro';
 import '../styles/fonts.css';
 import '../styles/tokens.css';
 import '../styles/global.css';
@@ -12,8 +13,20 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  /** Absolute or site-relative URL of the social image for this page (§9.5). */
+  ogImage?: string;
+  ogType?: 'website' | 'article';
 }
-const { title, description = 'Bold, colourful originals, prints and commissions by Sunshine Kiara Bhandary. Bangalore.' } = Astro.props;
+const {
+  title,
+  description = 'Bold, colourful originals, prints and commissions by Sunshine Kiara Bhandary. Bangalore.',
+  ogImage,
+  ogType = 'website',
+} = Astro.props;
+
+// Absolute URLs for canonical and Open Graph. `site` is set in astro.config.mjs.
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const socialImage = ogImage ? new URL(ogImage, Astro.site).href : undefined;
 
 const settings = await getEntry('siteConfig', 'site');
 // §7.8 — the announcement bar renders only when she switches it on and has written something.
@@ -47,7 +60,29 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
     <meta name="robots" content="noindex, nofollow" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={canonical} />
+
+    {/* Icons are derived from her seal (scripts/build-brand-assets.mjs). §9.6 wants the
+        simplified mark at 32px once it is traced and approved; until then this is her real
+        seal, which at 16-32px is muddy but is hers rather than Astro's default logo. */}
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    {/* Open Graph / Twitter. §9.5 governs the image itself. */}
+    <meta property="og:site_name" content="A Life Of Sunshine" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="en_IN" />
+    {socialImage && <meta property="og:image" content={socialImage} />}
+    {socialImage && <meta property="og:image:width" content="1200" />}
+    {socialImage && <meta property="og:image:height" content="630" />}
+    <meta name="twitter:card" content={socialImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {socialImage && <meta name="twitter:image" content={socialImage} />}
 
     {/* §3.1: preload both latin faces. crossorigin is required even same-origin,
         or the browser fetches the file a second time for the CSS. latin-ext is
@@ -137,8 +172,11 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
 
     <footer class="footer">
       <div class="container">
-        <p class="eyebrow">A Life Of Sunshine</p>
-        <p class="wordmark__sub">Sunshine · Kiara · Bhandary</p>
+        {/* §7.9 — the seal, then SUNSHINE . KIARA . BHANDARY beneath it. */}
+        <div class="footer__seal">
+          <Seal width={160} />
+          <p class="wordmark__sub">Sunshine · Kiara · Bhandary</p>
+        </div>
         <p class="body-sm">
           Canvas &amp; digital artist · Bangalore{shippingRegions ? ` · ships ${shippingRegions}` : ''}
         </p>

@@ -23,10 +23,18 @@ shippingRegions: across india
 processingTime: 7–14 working days
 printPaper: printed on very high quality pigmented paper with matte finish
 
+# All three are her existing dm2buy shop policies (brief.md §3), kept close to verbatim.
+# Nothing here is invented. The shipping line reads shippingRegions above, so if she resolves
+# the worldwide-vs-India contradiction there, this page follows.
 policies:
-  shipping: ""
-  returns: ""
-  damage: ""
+  shipping: |
+    ready to ship within 7-14 working days.
+
+    prepaid only - no cash on delivery.
+  returns: |
+    no cancellations, returns or exchanges.
+  damage: |
+    if something arrives damaged, send me an unboxing video and i'll sort it out.
 
 # DESIGN-SYSTEM.md §13 + §14.3 — `painting` is the specified default.
 hero:

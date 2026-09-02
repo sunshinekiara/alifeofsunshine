@@ -2,9 +2,19 @@
 // /work — the whole collection (§5.7 "all").
 import { getCollection } from 'astro:content';
 import GalleryPage from '../../components/GalleryPage.astro';
-import { sortArtworks } from '../../lib/artwork';
+import { missingAltText, sortArtworks } from '../../lib/artwork';
 
 const artworks = sortArtworks(await getCollection('artwork'));
+
+// §10.3 — "If `altText` is empty -> ... and the build logs a warning." Reported once here, on
+// the page that lists every work, rather than 55 times across the detail pages.
+const noAlt = artworks.filter(missingAltText);
+if (noAlt.length > 0) {
+  console.warn(
+    `[a11y] ${noAlt.length} of ${artworks.length} artworks have no altText (§10.3). ` +
+      `Sunshine needs to describe these in /admin: ${noAlt.map((a) => a.id).join(', ')}`,
+  );
+}
 ---
 <GalleryPage
   title="Work — A Life Of Sunshine"

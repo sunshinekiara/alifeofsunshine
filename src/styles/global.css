@@ -889,3 +889,45 @@ a:hover { color: var(--ink); }
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
 }
+
+/* §7.9 — the seal block in the footer. 160px desktop, 140px mobile, centred on mobile. */
+.footer__seal { margin-bottom: var(--space-5); }
+.footer__seal .seal { width: 140px; height: auto; }
+.footer__seal .wordmark__sub { margin-top: var(--space-3); }
+@media (min-width: 64em) {
+  .footer__seal .seal { width: 160px; }
+}
+@media (max-width: 63.99em) {
+  .footer__seal { text-align: center; }
+  .footer__seal .seal { margin-inline: auto; }
+}
+.about__lockup .seal { margin-inline: auto; width: 200px; height: auto; }
+
+/* ---- §10.5 tap targets: "every interactive element ≥ 44×44px" ----
+ * Measured at 390px: the nav anchors were 19px tall inside their 44px row, the wordmark 16px,
+ * the Instagram glyph 20px and the back link 17px. The rows were the right height; the links
+ * inside them were not, so the hit areas are grown without changing the visual layout.
+ */
+.nav__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+}
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+}
+.nav__ig {
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  justify-content: center;
+}
+/* The utility slot already reserves 44px for the phase-2 bag, so the glyph matching it keeps
+ * the lockup centred rather than shifting it. */
+.detail__back a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+}
+.skip-link { min-height: var(--tap-min); display: inline-flex; align-items: center; }
