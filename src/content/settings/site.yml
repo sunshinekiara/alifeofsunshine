@@ -1,0 +1,40 @@
+# Site settings. Sunshine edits this through /admin (the "Site settings" file collection).
+# Schema: src/content.config.ts -> siteConfig.
+
+# brief.md §8 — the phase-2 commerce switch. Wired, unused, and false for the whole of phase 1.
+commerceEnabled: false
+
+announcement:
+  active: false
+  text: ""
+  link: ""
+
+instagram: a_life_of_sunshine
+# email: BLOCKED — brief.md §11 asks which address enquiries should go to. The art book lists
+# one and there is a mobile number too; which becomes public is her call. Omitted until she says.
+
+# ⚠️ UNRESOLVED, brief.md §3 and §11: her Instagram bio says "Ships worldwide", her dm2buy shop
+# policy says "Ships across India only". This value is her CURRENT PUBLISHED SHOP POLICY, quoted,
+# not a decision — DESIGN-SYSTEM.md §13 makes the /policies build fail if this is unset, so it
+# cannot simply be blank. She must confirm before launch. Search BUILD-LOG.md for "shippingRegions".
+shippingRegions: across india
+
+# Both quoted verbatim from her dm2buy listings (brief.md §2 and §3).
+processingTime: 7–14 working days
+printPaper: printed on very high quality pigmented paper with matte finish
+
+policies:
+  shipping: ""
+  returns: ""
+  damage: ""
+
+# DESIGN-SYSTEM.md §13 + §14.3 — `painting` is the specified default.
+hero:
+  kind: painting
+  greeting: hi, i'm sunshine. i paint people, pets and the stories behind them.
+  line: scroll down for the work — dms are open if you want something made for someone you love.
+
+# DESIGN-SYSTEM.md §14.4 — `label` is the specified default: size/format on portfolio cards,
+# titles only on /prints.
+gallery:
+  cardCaption: label

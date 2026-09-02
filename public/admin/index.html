@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- The CMS must never be indexed. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Content manager · A Life Of Sunshine</title>
+  </head>
+  <body>
+    <!--
+      Sveltia CMS. Deliberately NOT type="module" — the Sveltia docs call that out explicitly.
+      Pinned to a major version so a breaking release cannot change Sunshine's admin overnight.
+
+      Sign-in for now is the "Sign In with Token" button: Rachit creates a GitHub personal
+      access token and pastes it in. The token lives in his browser's local storage and never
+      touches this repo. Step 8 replaces this with the Sveltia authenticator so Sunshine gets a
+      plain "Sign in with GitHub" button instead.
+    -->
+    <script src="https://unpkg.com/@sveltia/cms@^0/dist/sveltia-cms.js"></script>
+  </body>
+</html>

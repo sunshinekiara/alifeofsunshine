@@ -1,0 +1,2 @@
+# Keeps this collection folder in git so the glob loader has somewhere to look
+# on a fresh clone (Netlify builds from a clean checkout).

@@ -1,0 +1,439 @@
+# Sveltia CMS — the form Sunshine fills in. Mirrors src/content.config.ts exactly; if you add a
+# field there, add it here too or she cannot reach it.
+#
+# Media paths are set PER COLLECTION and are relative on purpose. Sveltia writes the
+# public_folder value into the frontmatter, and Astro's `image()` helper resolves image paths
+# relative to the markdown file — so from src/content/artwork/ the masters in src/assets/art/
+# are ../../assets/art. Setting media_folder and public_folder to the same relative path is what
+# makes an upload land in src/assets/art AND be written as a path Astro can follow into its
+# image pipeline. A leading-slash or absolute path here would break the build instead.
+
+backend:
+  name: github
+  repo: sunshinekiara/alifeofsunshine
+  branch: main
+
+site_url: https://funny-nougat-cdd057.netlify.app
+
+# Fallback for uploads from a collection that does not set its own.
+media_folder: src/assets/art
+public_folder: /src/assets/art
+
+collections:
+  # ---------------------------------------------------------------- artwork
+  - name: artwork
+    label: Artwork
+    label_singular: Artwork
+    description: >-
+      One entry per painting or digital piece. The picture and a title are the only things
+      required — everything else can be filled in later, and anything left blank is simply not
+      shown on the site rather than appearing empty.
+    folder: src/content/artwork
+    create: true
+    slug: '{{fields.title | slugify}}'
+    media_folder: '../../assets/art'
+    public_folder: '../../assets/art'
+    sortable_fields: [order, title, year]
+    summary: '{{title}}'
+    fields:
+      - name: title
+        label: title
+        widget: string
+        hint: As you'd say it on Instagram. Your capitalisation is kept exactly.
+
+      - name: image
+        label: the painting
+        widget: image
+        hint: The full picture, uncropped. Nothing on the site ever crops it.
+
+      - name: altText
+        label: alt text
+        widget: string
+        required: true
+        hint: >-
+          One sentence: what's in the picture, as if describing it on the phone — "a girl with
+          blue hair among blue flowers, looking straight at you". This is what someone who
+          can't see the image hears.
+
+      - name: body
+        label: the story
+        widget: markdown
+        required: false
+        hint: >-
+          A line or three in your words about this piece. Leave it empty and the story section
+          just doesn't appear.
+
+      - name: medium
+        label: medium
+        widget: select
+        required: false
+        options: [canvas, digital, sketch]
+
+      - name: mediumDetail
+        label: medium, in your words
+        widget: string
+        required: false
+        hint: 'Optional, e.g. "acrylic on canvas" or "procreate". Shown next to the size.'
+
+      - name: category
+        label: category
+        widget: select
+        required: false
+        options: [portrait, landscape, pop, abstract, other]
+
+      - name: year
+        label: year
+        widget: number
+        required: false
+        value_type: int
+        min: 1990
+        max: 2100
+
+      - name: dimensions
+        label: size
+        widget: string
+        required: false
+        hint: 'Width × height and the unit, nothing else — 24 × 36 in. Anything longer gets cut off on the cards.'
+
+      - name: original
+        label: the original
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - { name: forSale, label: original is for sale, widget: boolean, default: false }
+          - name: price
+            label: price in rupees
+            widget: number
+            required: false
+            value_type: int
+            hint: Numbers only, no ₹ and no commas. Leave blank and it shows "price on request".
+          - name: status
+            label: status
+            widget: select
+            required: false
+            options: [available, reserved, sold]
+            hint: Sold pieces stay on the site — they're your portfolio and they show demand.
+
+      - name: prints
+        label: prints
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - { name: available, label: prints available, widget: boolean, default: false }
+          - name: sizes
+            label: sizes and prices
+            widget: list
+            required: false
+            label_singular: size
+            summary: '{{fields.size}} — ₹{{fields.price}}'
+            hint: Only add the sizes you actually sell. The site prints the cm and inch dimensions for you.
+            fields:
+              - { name: size, label: size, widget: select, options: [A5, A4, A3, A2, A1] }
+              - name: price
+                label: price in rupees
+                widget: number
+                required: false
+                value_type: int
+
+      - name: featured
+        label: show on the homepage
+        widget: boolean
+        default: false
+
+      - name: order
+        label: order
+        widget: number
+        required: false
+        value_type: int
+        hint: Lower numbers come first. Leave blank and it sorts by year, then title.
+
+      # DESIGN-SYSTEM.md §5.3 — this is what stops the 14 bordered works reading as a jumble.
+      - name: frame
+        label: does the file have a painted edge?
+        widget: select
+        default: none
+        options:
+          - { label: 'no painted edge', value: none }
+          - { label: 'yes — a dark edge (black, navy, bottle green)', value: dark }
+          - { label: 'yes — a light edge (white, cream)', value: light }
+        hint: >-
+          Some of your files have a painted border inside the picture itself. Saying so lets the
+          site trim it on the small grid thumbnails only — the full picture with its edge is
+          always what shows on the artwork's own page.
+
+      - name: trim
+        label: how much edge to trim
+        widget: object
+        required: false
+        collapsed: true
+        hint: Percent off each side, thumbnails only. Leave empty for 4%, which suits most of them.
+        fields:
+          - { name: top, label: top %, widget: number, required: false, min: 0, max: 25 }
+          - { name: right, label: right %, widget: number, required: false, min: 0, max: 25 }
+          - { name: bottom, label: bottom %, widget: number, required: false, min: 0, max: 25 }
+          - { name: left, label: left %, widget: number, required: false, min: 0, max: 25 }
+
+      - name: contextImage
+        label: photo of it in the world
+        widget: image
+        required: false
+        hint: Optional — framed on a wall, in an office, held in your hand. Shown on the artwork's page.
+
+      - name: focal
+        label: focal point
+        widget: string
+        required: false
+        hint: 'Advanced, and only used for the social-share picture. e.g. 50% 40%'
+
+      - name: ogCrop
+        label: allow cropping for social shares
+        widget: boolean
+        default: false
+        hint: Off by default. On, the social-share picture crops to the focal point instead of being matted.
+
+      - name: titleLang
+        label: title language
+        widget: string
+        default: en
+        required: false
+        hint: Leave as en unless you've titled this one in Hindi or Kannada.
+
+  # ------------------------------------------------------- commission types
+  - name: commissionType
+    label: Commission types
+    label_singular: Commission type
+    description: >-
+      The kinds of commission you take — pet portraits, custom canvas, story and brand pieces.
+      Prices are yours to set; nothing here is filled in with a guess.
+    folder: src/content/commission-types
+    create: true
+    slug: '{{fields.title | slugify}}'
+    media_folder: '../../assets/art'
+    public_folder: '../../assets/art'
+    fields:
+      - { name: title, label: title, widget: string }
+      - { name: heroImage, label: main picture, widget: image, required: false }
+      - name: body
+        label: description
+        widget: markdown
+        required: false
+      - name: startingPrice
+        label: starting price in rupees
+        widget: number
+        required: false
+        value_type: int
+        hint: >-
+          Shown as "from ₹X". Leave it blank and no price appears anywhere — better a blank than
+          a number you'd have to argue with later.
+      - name: depositAmount
+        label: deposit in rupees
+        widget: number
+        required: false
+        value_type: int
+      - name: turnaround
+        label: how long it takes
+        widget: string
+        required: false
+        hint: 'In your words, e.g. "two to three weeks".'
+      - name: whatsIncluded
+        label: what's included
+        widget: list
+        required: false
+        field: { name: item, label: item, widget: string }
+      - name: examples
+        label: example artworks
+        widget: relation
+        required: false
+        multiple: true
+        collection: artwork
+        search_fields: [title]
+        display_fields: [title]
+        value_field: '{{slug}}'
+      - { name: order, label: order, widget: number, required: false, value_type: int }
+
+  # ----------------------------------------------------------- case studies
+  # DESIGN-SYSTEM.md §7.4 — "from photo to portrait". Her strongest existing content.
+  - name: caseStudy
+    label: Case studies
+    label_singular: Case study
+    description: >-
+      A photo someone sent you, what you did with it, and the finished painting. The eight in
+      your art book are all case studies.
+    folder: src/content/case-studies
+    create: true
+    slug: '{{fields.title | slugify}}'
+    media_folder: '../../assets/art'
+    public_folder: '../../assets/art'
+    fields:
+      - name: title
+        label: title
+        widget: string
+        hint: A few words — the client's name or the pet's. It clamps to two lines in the block.
+      - name: finalImage
+        label: the painting
+        widget: image
+        hint: Required. Without it the block can't be shown.
+      - name: referenceImage
+        label: the photo they sent
+        widget: image
+        required: false
+        hint: Optional. Left out, the block becomes just the process and the painting.
+      - name: commissionType
+        label: which commission type
+        widget: relation
+        required: false
+        collection: commissionType
+        search_fields: [title]
+        display_fields: [title]
+        value_field: '{{slug}}'
+      - name: finalArtwork
+        label: link to the artwork page
+        widget: relation
+        required: false
+        collection: artwork
+        search_fields: [title]
+        display_fields: [title]
+        value_field: '{{slug}}'
+      - name: notes
+        label: the process
+        widget: list
+        required: false
+        label_singular: step
+        summary: '{{fields.text}}'
+        hint: One to six short steps in your words. More than six and only the first six show.
+        fields:
+          - { name: text, label: step, widget: text }
+      - name: quote
+        label: a line to pull out
+        widget: text
+        required: false
+        hint: One line — yours or theirs.
+      - { name: order, label: order, widget: number, required: false, value_type: int }
+
+  # ----------------------------------------------------------------- events
+  - name: event
+    label: Events
+    label_singular: Event
+    description: Pop-ups and shows. Past ones stay up automatically.
+    folder: src/content/events
+    create: true
+    slug: '{{fields.title | slugify}}'
+    media_folder: '../../assets/art'
+    public_folder: '../../assets/art'
+    fields:
+      - { name: title, label: title, widget: string }
+      - { name: startDate, label: starts, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, picker_utc: true }
+      - name: endDate
+        label: ends
+        widget: datetime
+        required: false
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        picker_utc: true
+        hint: Leave blank for a one-day event.
+      - { name: venue, label: venue, widget: string, required: false }
+      - { name: city, label: city, widget: string, required: false }
+      - name: body
+        label: description
+        widget: markdown
+        required: false
+        hint: Two or three sentences.
+      - { name: image, label: poster or photo, widget: image, required: false }
+      - { name: link, label: link, widget: string, required: false, hint: 'Full address including https://' }
+      - name: status
+        label: force past or upcoming
+        widget: select
+        required: false
+        options: [upcoming, past]
+        hint: >-
+          Normally leave this alone — the site works it out from the dates. Only use it to mark
+          something cancelled that hasn't happened yet.
+
+  # --------------------------------------------------------- site settings
+  - name: settings
+    label: Site settings
+    files:
+      - name: site
+        label: Site settings
+        file: src/content/settings/site.yml
+        description: The handful of things that apply to the whole site.
+        fields:
+          - name: instagram
+            label: instagram handle
+            widget: string
+            hint: Without the @.
+          - name: email
+            label: email for enquiries
+            widget: string
+            required: false
+            hint: Where the enquiry form sends to. Leave blank and only the Instagram link shows.
+          - name: shippingRegions
+            label: where you ship
+            widget: string
+            hint: >-
+              Shown on the site as-is, e.g. "across india" or "worldwide". Your Instagram bio
+              currently says worldwide and your shop policy says India only — these need to agree.
+          - name: processingTime
+            label: how long orders take
+            widget: string
+            required: false
+          - name: printPaper
+            label: what prints are printed on
+            widget: string
+            required: false
+          - name: announcement
+            label: announcement bar
+            widget: object
+            collapsed: true
+            fields:
+              - { name: active, label: show the bar, widget: boolean, default: false }
+              - name: text
+                label: text
+                widget: string
+                required: false
+                hint: One short sentence, one emoji at most.
+              - { name: link, label: link, widget: string, required: false }
+          - name: hero
+            label: homepage top
+            widget: object
+            collapsed: true
+            fields:
+              - name: kind
+                label: lead with
+                widget: select
+                default: painting
+                options:
+                  - { label: 'a painting', value: painting }
+                  - { label: 'a photo of you', value: photo }
+              - { name: greeting, label: greeting, widget: text, required: false }
+              - { name: line, label: line underneath, widget: string, required: false }
+              - { name: photo, label: photo of you, widget: image, required: false }
+              - { name: focal, label: photo focal point, widget: string, required: false }
+          - name: gallery
+            label: gallery
+            widget: object
+            collapsed: true
+            fields:
+              - name: cardCaption
+                label: what shows under each picture
+                widget: select
+                default: label
+                options:
+                  - { label: 'size and format only', value: label }
+                  - { label: 'the title only', value: title }
+                  - { label: 'both', value: both }
+          - name: policies
+            label: policies
+            widget: object
+            collapsed: true
+            fields:
+              - { name: shipping, label: shipping, widget: markdown, required: false }
+              - { name: returns, label: returns, widget: markdown, required: false }
+              - { name: damage, label: damaged in transit, widget: markdown, required: false }
+          - name: commerceEnabled
+            label: 'shopping cart (not built yet — leave off)'
+            widget: boolean
+            default: false
+            hint: This is a switch for later, when the site can take payments. It does nothing today.
