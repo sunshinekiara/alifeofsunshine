@@ -1,0 +1,88 @@
+---
+/**
+ * Artwork card — DESIGN-SYSTEM.md §7.1, §5.4, §5.5.
+ *
+ * The whole cell is one link. The image does nothing on hover (§5.5); only the label underlines.
+ * Portfolio grids carry one label line; the /prints shop variant carries title + label.
+ */
+import ResponsiveArt from './ResponsiveArt.astro';
+import { cardAlt, cardImage, cardLabel, formatPrice, isLandscape, orderedSizes } from '../lib/artwork';
+import type { Artwork } from '../lib/artwork';
+
+interface Props {
+  artwork: Artwork;
+  /** 'portfolio' = one label line (§5.4). 'shop' = title + price range, /prints only. */
+  variant?: 'portfolio' | 'shop';
+  /** §5.8 — the first few cards load eagerly; the rest lazily. */
+  eager?: boolean;
+  /** §5.8 — only the first two get fetchpriority high. */
+  priority?: boolean;
+  /** §5.6 — related strips disable spanning so landscapes are simply smaller. */
+  noSpan?: boolean;
+}
+
+const { artwork, variant = 'portfolio', eager = false, priority = false, noSpan = false } = Astro.props;
+
+const image = cardImage(artwork);
+const label = cardLabel(artwork);
+const wide = !noSpan && isLandscape(artwork);
+
+// §5.9 — card widths and the sizes attribute. A wide card occupies two columns, so it doubles.
+const widths = wide ? [640, 960, 1280] : [320, 480, 640, 960];
+const sizes = wide
+  ? '(min-width: 80em) 768px, (min-width: 48em) calc((100vw - 96px) / 3 * 2), calc(100vw - 32px)'
+  : '(min-width: 80em) 384px, (min-width: 48em) calc((100vw - 96px) / 3), calc((100vw - 48px) / 2)';
+
+// §5.4 shop variant: `A5–A1 · FROM ₹1,700`
+const sizeList = orderedSizes(artwork);
+const cheapest = sizeList
+  .map((s) => s.price)
+  .filter((p): p is number => typeof p === 'number')
+  .sort((a, b) => a - b)[0];
+const shopLabel = sizeList.length
+  ? [
+      sizeList.length > 1
+        ? `${sizeList[0].size}–${sizeList[sizeList.length - 1].size}`
+        : sizeList[0].size,
+      cheapest !== undefined ? `FROM ${formatPrice(cheapest)}` : null,
+    ]
+      .filter(Boolean)
+      .join(' · ')
+  : null;
+---
+
+<a
+  class:list={['cell', { 'cell--wide': wide }]}
+  href={`/work/${artwork.id}`}
+  data-variant={variant}
+>
+  <span class="cell__frame">
+    {/* §9.3 gallery card: AVIF q55 -> WebP q72 */}
+    <ResponsiveArt
+      src={image}
+      alt={cardAlt(artwork)}
+      widths={widths}
+      sizes={sizes}
+      avifQuality={55}
+      webpQuality={72}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding={eager ? 'sync' : 'async'}
+      fetchpriority={priority ? 'high' : 'auto'}
+    />
+  </span>
+
+  {
+    variant === 'shop' ? (
+      <>
+        <span class="cell__title card-title">{artwork.data.title}</span>
+        {shopLabel && <span class="cell__label label">{shopLabel}</span>}
+      </>
+    ) : (
+      <>
+        {/* §5.4 — the title is the link's accessible name even though it is not shown. */}
+        <span class="visually-hidden">{artwork.data.title}</span>
+        {label && <span class="cell__label label">{label}</span>}
+      </>
+    )
+  }
+</a>

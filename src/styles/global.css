@@ -284,3 +284,213 @@ a:hover { color: var(--ink); }
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
+
+/* ---- The gallery (§5.1, §5.2, §5.5, §5.6) ----
+ * Fixed-proportion cells, object-fit: contain, an invisible --paper mat. The grid lines carry
+ * the uniformity; the paintings are never cropped (principle 1).
+ */
+.gallery { container-type: inline-size; }
+
+.gallery__grid {
+  --cols: var(--gallery-cols);
+  --gap: var(--gallery-gap-x);
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: var(--gallery-gap-y) var(--gap);
+  grid-auto-flow: dense;   /* fills the hole a span-2 leaves; DOM order is unchanged */
+  grid-auto-rows: max-content;
+}
+
+.cell {
+  display: grid;
+  grid-template-rows: auto max-content;
+  row-gap: var(--space-2);
+  text-decoration: none;
+  color: inherit;
+}
+/* The fixed-ratio frame (§5.1). Deliberately NOT the max-width/max-height pair §5.2 sketches:
+ * measured in the browser, `max-width: 100%` resolved but `max-height: 100%` did not, because
+ * the frame's height comes from `aspect-ratio` and the grid row is content-sized, which makes a
+ * percentage height circular. A 3:4 painting therefore overflowed the 4:5 frame by 31px and was
+ * silently clipped — cropping, which principle 1 forbids.
+ *
+ * Absolute positioning inside the ratio box makes the image box exactly the frame, and
+ * `object-fit: contain` then letterboxes the whole painting on --paper. Same intended result,
+ * and containment is guaranteed by CSS rather than by a percentage that may not resolve.
+ * No `overflow: hidden` here on purpose: nothing should ever be able to crop silently again.
+ */
+.cell__frame {
+  position: relative;
+  aspect-ratio: var(--cell-ratio);
+  background: var(--paper);
+}
+.cell__frame picture { display: contents; }
+.cell__frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* §5.2 — a landscape spans two columns and matches the single-span row height exactly. */
+@supports (height: 1cqw) {
+  .gallery__grid:not([data-nospan]) .cell--wide { grid-column: span 2; }
+  .gallery__grid:not([data-nospan]) .cell--wide .cell__frame {
+    aspect-ratio: auto;
+    height: calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) * 1.25);
+  }
+}
+
+/* §5.4 — the label is left-aligned to the CELL edge, not the image edge. One line, ellipsised. */
+.cell__label,
+.cell__title {
+  display: block;
+  text-align: start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cell__title { color: var(--ink); white-space: normal; overflow-wrap: anywhere; }
+.cell[data-variant='shop'] { grid-template-rows: auto max-content max-content; row-gap: var(--space-1); }
+.cell[data-variant='shop'] .cell__frame { margin-bottom: var(--space-1); }
+
+/* §5.5 — the image does nothing. Only the caption underlines. */
+.cell:hover .cell__label,
+.cell:hover .cell__title {
+  text-decoration: underline;
+  text-decoration-color: var(--sage-deep);
+  text-underline-offset: 0.15em;
+}
+.cell:focus-visible { outline: var(--focus-ring); outline-offset: 4px; }
+.cell:active { transform: none; }
+
+.gallery-empty > * + * { margin-top: var(--space-4); }
+
+/* ---- Sections shared by the page anatomies (§13) ---- */
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
+/* §7.8 — announcement bar. Sage-tint fill, ink body-sm, centred. No close button. */
+.announcement {
+  background: var(--sage-tint);
+  color: var(--ink);
+  text-align: center;
+  padding: var(--space-2) var(--gutter);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+}
+.announcement a { color: var(--ink); }
+.announcement__text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;      /* clamps to 2 lines on mobile, then ellipsis */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---- Home hero (§13, `painting` variant — §14.3 default) ---- */
+.hero { padding-block: var(--space-7) 0; }
+.hero__grid { display: grid; gap: var(--space-6); }
+.hero__figure { margin: 0; }
+.hero__figure picture { display: contents; }
+.hero__figure img {
+  /* BOTH auto. With only width:auto the `height` attribute stays in force and max-height
+     clamps it, which squashes the painting — principle 1 forbids the UI altering it. */
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 62vh;          /* mobile (§13) */
+  object-fit: contain;
+  margin-inline: auto;
+}
+.hero__text > * + * { margin-top: var(--space-4); }
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  /* §2.3 / §14.1: the straw button must keep --space-6 clearance from any artwork edge. */
+  margin-top: var(--space-6);
+}
+
+@media (min-width: 64em) {
+  .hero { padding-block: var(--space-8) 0; }
+  .hero__grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: center;
+  }
+  .hero__figure { grid-column: 1 / span 7; }
+  .hero__figure img { max-height: 80vh; }
+  .hero__text {
+    grid-column: 8 / span 5;
+    /* principle 2 / §14.1 — keep the straw button clear of the painting's edge. */
+    padding-left: var(--space-6);
+  }
+}
+
+/* ---- "What I do" (§13 item 4) ---- */
+.what-i-do { display: grid; gap: var(--space-6); }
+@media (min-width: 48em) { .what-i-do { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.what-i-do__card { text-decoration: none; color: inherit; display: block; }
+.what-i-do__frame {
+  aspect-ratio: var(--cell-ratio);
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+  margin-bottom: var(--space-3);
+}
+/* width/height auto for the same reason as the hero — see .hero__figure img. */
+.what-i-do__frame picture { display: contents; }
+.what-i-do__frame img {
+  width: auto; height: auto;
+  max-width: 100%; max-height: 100%;
+  object-fit: contain;
+}
+.what-i-do__card > * + * { margin-top: var(--space-2); }
+.what-i-do__card:hover .subheading { text-decoration: underline; text-decoration-color: var(--sage-deep); text-underline-offset: 0.15em; }
+
+/* ---- Instagram band (§13 item 7). No embed: a sage-tint band and a link. ---- */
+.ig-band {
+  background: var(--sage-tint);
+  color: var(--ink);
+  padding-block: var(--space-8);
+  margin-top: var(--section-gap);
+  text-align: center;
+}
+.ig-band > .container > * + * { margin-top: var(--space-4); }
+.ig-band .heading { color: var(--ink); }
+
+/* ---- About (§13) ---- */
+.about__portrait {
+  width: 280px;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--line);   /* §9.2 — a photo always carries the hairline */
+  background: var(--mat);
+}
+.about__portrait img { width: 100%; height: 100%; object-fit: cover; }
+.about__lockup { text-align: center; margin-top: var(--section-gap); }
+.about__lockup .wordmark { display: inline-block; font-size: 1.5rem; }
+.about__lockup .wordmark__sub { color: var(--ink-soft); margin-top: var(--space-2); }
+@media (min-width: 64em) {
+  /* :has() so the two-column split only happens when a portrait exists. Without it the lone
+     text block landed in the 280px portrait column and the measure collapsed. */
+  .about__intro:has(.about__portrait) {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--space-6);
+    align-items: start;
+  }
+}
+
+/* §7.10 — a secondary button on the sage-tint band: --sage-tint hover would be invisible
+ * against the band itself, so it lifts to --paper instead. Still --ink text and border. */
+.ig-band .btn--secondary:hover { background: var(--paper); color: var(--ink); }

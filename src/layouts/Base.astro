@@ -4,6 +4,7 @@
 // The @fontsource-variable packages stay installed as the source of those woff2 files
 // (`npm run fonts:sync`) but their CSS is deliberately NOT imported — it names the
 // families "... Variable", which never matched the token stacks. See fonts.css.
+import { getEntry } from 'astro:content';
 import '../styles/fonts.css';
 import '../styles/tokens.css';
 import '../styles/global.css';
@@ -13,6 +14,13 @@ interface Props {
   description?: string;
 }
 const { title, description = 'Bold, colourful originals, prints and commissions by Sunshine Kiara Bhandary. Bangalore.' } = Astro.props;
+
+const settings = await getEntry('siteConfig', 'site');
+// §7.8 — the announcement bar renders only when she switches it on and has written something.
+const announcement = settings?.data.announcement;
+const showAnnouncement = Boolean(announcement?.active && announcement.text);
+const instagram = settings?.data.instagram ?? 'a_life_of_sunshine';
+const shippingRegions = settings?.data.shippingRegions;
 ---
 
 <!doctype html>
@@ -49,6 +57,20 @@ const { title, description = 'Bold, colourful originals, prints and commissions 
 
   <body>
     <a class="skip-link" href="#content">Skip to content</a>
+
+    {/* §7.8 — announcement bar, above the nav. No close button: she controls it from the CMS. */}
+    {
+      showAnnouncement &&
+        (announcement!.link ? (
+          <a class="announcement" href={announcement!.link}>
+            <span class="announcement__text">{announcement!.text}</span>
+          </a>
+        ) : (
+          <div class="announcement">
+            <span class="announcement__text">{announcement!.text}</span>
+          </div>
+        ))
+    }
 
     <header class="site-header">
       <div class="container">
@@ -95,9 +117,11 @@ const { title, description = 'Bold, colourful originals, prints and commissions 
       <div class="container">
         <p class="eyebrow">A Life Of Sunshine</p>
         <p class="wordmark__sub">Sunshine · Kiara · Bhandary</p>
-        <p class="body-sm">Canvas &amp; digital artist · Bangalore · Ships across India</p>
         <p class="body-sm">
-          <a href="https://www.instagram.com/a_life_of_sunshine/" rel="noopener">@a_life_of_sunshine</a>
+          Canvas &amp; digital artist · Bangalore{shippingRegions ? ` · ships ${shippingRegions}` : ''}
+        </p>
+        <p class="body-sm">
+          <a href={`https://www.instagram.com/${instagram}/`} rel="noopener">@{instagram}</a>
         </p>
       </div>
     </footer>

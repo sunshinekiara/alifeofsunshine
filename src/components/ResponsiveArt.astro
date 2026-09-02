@@ -1,0 +1,79 @@
+---
+/**
+ * One <picture> for every painting on the site — DESIGN-SYSTEM.md §9.3 and §5.9.
+ *
+ * Why this is hand-built instead of `<Picture>`: §9.3 specifies a DIFFERENT quality per format
+ * ("AVIF q55 → WebP q72" for cards, "AVIF q60 → WebP q78" for heroes), and `<Picture>` takes a
+ * single `quality` that it applies to every format. Passing 72 to both made the AVIF *larger*
+ * than the WebP (72.5 KB vs 51.1 KB at 480w), which defeats the point of offering AVIF first.
+ * `getImage()` lets each format carry its own quality, and also caps the plain `<img src>` so
+ * the no-srcset fallback is not the full-size file (it was 575 KB).
+ *
+ * §5.9's budget matters here: this is an Instagram-bio-link site on Indian mobile data.
+ */
+import { getImage } from 'astro:assets';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  widths: number[];
+  sizes: string;
+  /** §9.3 — cards and case studies use 55/72; heroes use 60/78. */
+  avifQuality?: number;
+  webpQuality?: number;
+  loading?: 'eager' | 'lazy';
+  decoding?: 'sync' | 'async' | 'auto';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  class?: string;
+  style?: string;
+}
+
+const {
+  src,
+  alt,
+  widths,
+  sizes,
+  avifQuality = 55,
+  webpQuality = 72,
+  loading = 'lazy',
+  decoding = 'async',
+  fetchpriority = 'auto',
+  class: className,
+  style,
+} = Astro.props;
+
+// Never ask for a width larger than the source — upscaling wastes bytes and softens the paint.
+const capped = widths.filter((w) => w <= src.width);
+const usable = capped.length > 0 ? capped : [src.width];
+
+const [avif, webp] = await Promise.all([
+  getImage({ src, widths: usable, sizes, format: 'avif', quality: avifQuality }),
+  getImage({ src, widths: usable, sizes, format: 'webp', quality: webpQuality }),
+]);
+
+// The bare <img> only serves browsers that take neither AVIF nor WebP, so it is capped at the
+// smallest useful width rather than the full file.
+const fallback = await getImage({
+  src,
+  width: Math.min(640, src.width),
+  format: 'jpeg',
+  quality: webpQuality,
+});
+---
+
+<picture>
+  <source type="image/avif" srcset={avif.srcSet.attribute} sizes={sizes} />
+  <source type="image/webp" srcset={webp.srcSet.attribute} sizes={sizes} />
+  <img
+    src={fallback.src}
+    alt={alt}
+    width={src.width}
+    height={src.height}
+    sizes={sizes}
+    loading={loading}
+    decoding={decoding}
+    fetchpriority={fetchpriority}
+    class={className}
+    style={style}
+  />
+</picture>

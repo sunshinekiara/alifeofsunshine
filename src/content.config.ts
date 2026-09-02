@@ -191,4 +191,25 @@ const siteConfig = defineCollection({
   }),
 });
 
-export const collections = { artwork, commissionType, caseStudy, event, siteConfig };
+/**
+ * Prose pages. Not in brief.md §9 — added because §13's /about is the one page whose body is
+ * genuinely her writing (her artist statement, verbatim from the art book) rather than config,
+ * and brief.md §5 is explicit that she has to be able to edit her own words without a developer.
+ * /contact and /policies stay in `siteConfig`, as §13 has them.
+ */
+const page = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/pages' }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      /** §13 /about — her portrait, 1:1. §9.2: photos carry the hairline border, paintings never. */
+      portrait: image().optional(),
+      portraitAlt: z.string().optional(),
+      /** §13 — "PRESS & MENTIONS list (omitted if empty)". */
+      press: z
+        .array(z.object({ text: z.string(), link: z.string().optional() }))
+        .default([]),
+    }),
+});
+
+export const collections = { artwork, commissionType, caseStudy, event, siteConfig, page };

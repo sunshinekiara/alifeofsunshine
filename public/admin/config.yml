@@ -351,6 +351,40 @@ collections:
           Normally leave this alone — the site works it out from the dates. Only use it to mark
           something cancelled that hasn't happened yet.
 
+  # ------------------------------------------------------------ prose pages
+  # /about is the one page whose body is genuinely her writing. brief.md §5 says she has to be
+  # able to edit her own words, so it is a content file rather than markup in a component.
+  - name: page
+    label: Pages
+    files:
+      - name: about
+        label: About page
+        file: src/content/pages/about.md
+        media_folder: '../../assets/art'
+        public_folder: '../../assets/art'
+        fields:
+          - { name: title, label: heading, widget: string }
+          - name: body
+            label: your story
+            widget: markdown
+            hint: This is the text on your About page. It's your words from the art book — change it however you like.
+          - name: portrait
+            label: photo of you
+            widget: image
+            required: false
+            hint: Square works best. Shown beside your story.
+          - { name: portraitAlt, label: describe the photo, widget: string, required: false }
+          - name: press
+            label: press & mentions
+            widget: list
+            required: false
+            label_singular: mention
+            summary: '{{fields.text}}'
+            hint: Leave empty and this section doesn't appear.
+            fields:
+              - { name: text, label: what it says, widget: string }
+              - { name: link, label: link, widget: string, required: false }
+
   # --------------------------------------------------------- site settings
   - name: settings
     label: Site settings

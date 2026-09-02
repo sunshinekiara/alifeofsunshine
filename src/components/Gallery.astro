@@ -1,0 +1,63 @@
+---
+/**
+ * The gallery — DESIGN-SYSTEM.md §5. One component for /work and its filters, /originals,
+ * /prints, commission examples and every related strip; only the data and column count change.
+ *
+ * §5.8 empty state: zero items renders her line and a link, never an empty grid.
+ */
+import ArtworkCard from './ArtworkCard.astro';
+import { sortArtworks } from '../lib/artwork';
+import type { Artwork } from '../lib/artwork';
+
+interface Props {
+  artworks: Artwork[];
+  variant?: 'portfolio' | 'shop';
+  /** §5.6 — related strips cap at 3 and disable the two-column landscape span. */
+  noSpan?: boolean;
+  /** Skip the built-in empty state when the page wants to say something else. */
+  emptyText?: string | null;
+  emptyHref?: string;
+  emptyLinkText?: string;
+}
+
+const {
+  artworks,
+  variant = 'portfolio',
+  noSpan = false,
+  emptyText = 'nothing here yet — the paintings are on their way.',
+  emptyHref = '/work',
+  emptyLinkText = 'see all the work →',
+} = Astro.props;
+
+const items = sortArtworks(artworks);
+
+// §5.8 — first 6 eager on desktop, first 4 on mobile; we cannot branch on viewport at build,
+// so the first 4 are eager (the mobile number, the safer one) and the first 2 get high priority.
+const EAGER_COUNT = 4;
+const PRIORITY_COUNT = 2;
+---
+
+{
+  items.length === 0 ? (
+    emptyText && (
+      <div class="gallery-empty">
+        <p class="body-lg measure">{emptyText}</p>
+        <p><a class="btn--text" href={emptyHref}>{emptyLinkText}</a></p>
+      </div>
+    )
+  ) : (
+    <div class="gallery">
+      <div class="gallery__grid" data-nospan={noSpan ? 'true' : undefined}>
+        {items.map((artwork, i) => (
+          <ArtworkCard
+            artwork={artwork}
+            variant={variant}
+            noSpan={noSpan}
+            eager={i < EAGER_COUNT}
+            priority={i < PRIORITY_COUNT}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}

@@ -1,33 +1,141 @@
 ---
+/**
+ * Home — DESIGN-SYSTEM.md §13.
+ *
+ * Sections in §13's order. Anything with no content yet is simply not rendered (principle 4),
+ * so this page grows as steps 5 and 6 land rather than showing empty scaffolding:
+ *   4. WHAT I DO           — needs commissionType entries (step 5)
+ *   5. featured case study — needs caseStudy entries (step 5)
+ *   6. next event band     — needs event entries (step 6)
+ */
+import { Image } from 'astro:assets';
+import { getCollection, getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import Gallery from '../components/Gallery.astro';
+import ResponsiveArt from '../components/ResponsiveArt.astro';
+import { detailAlt, sortArtworks } from '../lib/artwork';
+import { formatPrice } from '../lib/artwork';
+
+const settings = await getEntry('siteConfig', 'site');
+const hero = settings?.data.hero ?? { kind: 'painting' as const };
+
+const all = await getCollection('artwork');
+const featured = sortArtworks(all.filter((a) => a.data.featured));
+
+// §13 item 2 — the hero painting is `featured: true` with the lowest `order`.
+const heroArtwork = hero.kind === 'painting' ? featured[0] : undefined;
+// It must not appear twice, so FEATURED WORK starts after it. Six items (§13 item 3).
+const featuredGrid = (heroArtwork ? featured.slice(1) : featured).slice(0, 6);
+
+const commissionTypes = (await getCollection('commissionType')).sort(
+  (a, b) => (a.data.order ?? Infinity) - (b.data.order ?? Infinity),
+);
+
+const greeting = hero.greeting ?? 'hi, i’m sunshine. i paint people, pets and the stories behind them.';
+const line = hero.line ?? 'scroll down for the work — dms are open if you want something made for someone you love.';
 ---
 
-<Base title="A Life Of Sunshine">
-  <section class="container section">
-    <p class="eyebrow">Canvas &amp; Digital Artist · Bangalore</p>
+<Base title="A Life Of Sunshine — canvas & digital artist, Bangalore">
+  {/* ---- 2. Hero. §13 `painting` variant, the §14.3 default. No sage anywhere near it. ---- */}
+  <section class="hero container">
+    <div class="hero__grid">
+      {
+        heroArtwork && (
+          <figure class="hero__figure">
+            {/* §9.3 home hero: AVIF q60 -> WebP q78 */}
+            <ResponsiveArt
+              src={heroArtwork.data.image}
+              alt={detailAlt(heroArtwork)}
+              widths={[768, 1200, 1600, 2000]}
+              sizes="(min-width: 64em) 58vw, 100vw"
+              avifQuality={60}
+              webpQuality={78}
+              loading="eager"
+              decoding="sync"
+              fetchpriority="high"
+            />
+          </figure>
+        )
+      }
 
-    <h1 class="title measure" style="margin-top: var(--space-4);">
-      hi, i'm sunshine. i paint people, pets and the stories behind them.
-    </h1>
-
-    <p class="body-lg measure" style="margin-top: var(--space-5); color: var(--ink-soft);">
-      scroll down for the work — dms are open if you want something made for someone you love.
-    </p>
-
-    <div class="cluster" style="margin-top: var(--space-6);">
-      <a class="btn btn--primary" href="/work">See the work</a>
-      <a class="btn btn--secondary" href="/commissions">Commission a piece</a>
+      <div class="hero__text">
+        <p class="eyebrow">Canvas &amp; Digital Artist · Bangalore</p>
+        {/* Her casing, kept exactly — §3.2: "Do not auto-capitalise anything she types." */}
+        <h1 class="title measure">{greeting}</h1>
+        <p class="body measure">{line}</p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="/work">See the work</a>
+          <a class="btn--text" href="/commissions">commission a piece →</a>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="container section" style="border-top: 1px solid var(--line);">
-    <p class="eyebrow">Design system check</p>
-    <h2 class="display-2" style="margin-top: var(--space-4);">Display Two</h2>
-    <p class="label" style="margin-top: var(--space-5);">24 × 36 in · Canvas</p>
-    <p class="body measure" style="margin-top: var(--space-4);">
-      Body text on paper. This paragraph exists to confirm the type scale, the measure,
-      and that <a href="/work">links</a> render in sage-deep.
-    </p>
-    <p class="caption" style="margin-top: var(--space-3);">Caption, in ink-muted.</p>
+  {/* ---- 3. Featured work ---- */}
+  {
+    featuredGrid.length > 0 && (
+      <section class="container section">
+        <div class="section-head">
+          <h2 class="heading">Featured work</h2>
+          <a class="btn--text" href="/work">everything →</a>
+        </div>
+        <Gallery artworks={featuredGrid} emptyText={null} />
+      </section>
+    )
+  }
+
+  {/* ---- 4. What I do. Renders once commission types exist (step 5). ---- */}
+  {
+    commissionTypes.length > 0 && (
+      <section class="container section">
+        <div class="section-head">
+          <h2 class="heading">What I do</h2>
+        </div>
+        <div class="what-i-do">
+          {commissionTypes.map((type) => (
+            <a class="what-i-do__card" href={`/commissions/${type.id}`}>
+              {type.data.heroImage && (
+                <span class="what-i-do__frame">
+                  <Image
+                    src={type.data.heroImage}
+                    alt={type.data.title}
+                    widths={[320, 480, 640]}
+                    sizes="(min-width: 48em) calc((100vw - 96px) / 3), calc(100vw - 32px)"
+                    formats={['avif', 'webp']}
+                    quality={72}
+                    layout="none"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+              )}
+              <span class="subheading">{type.data.title}</span>
+              {/* §13: `from ₹X` is omitted entirely when there is no startingPrice, which is
+                  the case for every type until Sunshine sets her prices (brief §2). */}
+              {type.data.startingPrice !== undefined && (
+                <span class="price">from {formatPrice(type.data.startingPrice)}</span>
+              )}
+            </a>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {/* ---- 7. On Instagram. §13: no embed — a band and a link. ---- */}
+  <section class="ig-band">
+    <div class="container">
+      <h2 class="heading">@{settings?.data.instagram ?? 'a_life_of_sunshine'}</h2>
+      <p class="body">follow along — dms are open</p>
+      <p>
+        <a
+          class="btn btn--secondary"
+          href={`https://www.instagram.com/${settings?.data.instagram ?? 'a_life_of_sunshine'}/`}
+          rel="noopener"
+        >
+          Open Instagram
+        </a>
+      </p>
+    </div>
   </section>
 </Base>
