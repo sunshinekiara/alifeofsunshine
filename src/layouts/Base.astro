@@ -1,0 +1,105 @@
+---
+// Base layout — DESIGN-SYSTEM.md §7.8 (nav), §7.9 (footer).
+// Fonts are self-hosted from public/fonts; nothing is fetched from Google at runtime.
+// The @fontsource-variable packages stay installed as the source of those woff2 files
+// (`npm run fonts:sync`) but their CSS is deliberately NOT imported — it names the
+// families "... Variable", which never matched the token stacks. See fonts.css.
+import '../styles/fonts.css';
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = 'Bold, colourful originals, prints and commissions by Sunshine Kiara Bhandary. Bangalore.' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <!-- Work in progress: keep the half-built site out of search results.
+         Remove this before launch (DESIGN-SYSTEM.md polish step). -->
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/* §3.1: preload both latin faces. crossorigin is required even same-origin,
+        or the browser fetches the file a second time for the CSS. latin-ext is
+        deliberately not preloaded — unicode-range fetches it only when needed. */}
+    <link
+      rel="preload"
+      href="/fonts/bodoni-moda-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/dm-sans-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container">
+        <nav class="nav" aria-label="Main">
+          <div class="nav__wordmark-cell">
+            <a class="wordmark" href="/">A Life Of Sunshine</a>
+          </div>
+
+          {/* §7.8 puts about/contact in the right-hand group on desktop. They stay
+              in this row until /contact exists — one row of real links beats a link
+              to a 404. */}
+          <div class="nav__links">
+            <a href="/work">Work</a>
+            <a href="/commissions">Commissions</a>
+            <a href="/about">About</a>
+          </div>
+
+          <div class="nav__utility">
+            <a
+              class="nav__ig"
+              href="https://www.instagram.com/a_life_of_sunshine/"
+              rel="noopener"
+              aria-label="instagram"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                   stroke-linecap="round" aria-hidden="true" focusable="false">
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+              </svg>
+            </a>
+            {/* Reserved for the phase-2 bag icon. Empty on purpose — see §7.8. */}
+            <div class="nav__bag-slot" aria-hidden="true"></div>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main id="content">
+      <slot />
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p class="eyebrow">A Life Of Sunshine</p>
+        <p class="wordmark__sub">Sunshine · Kiara · Bhandary</p>
+        <p class="body-sm">Canvas &amp; digital artist · Bangalore · Ships across India</p>
+        <p class="body-sm">
+          <a href="https://www.instagram.com/a_life_of_sunshine/" rel="noopener">@a_life_of_sunshine</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

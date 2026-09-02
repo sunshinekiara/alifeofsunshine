@@ -1,18 +1,33 @@
 ---
-
+import Base from '../layouts/Base.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>A Life Of Sunshine</title>
-	</head>
-	<body>
-		<h1>A Life Of Sunshine</h1>
-		<p>Canvas &amp; digital artist, Bangalore.</p>
-	</body>
-</html>
+<Base title="A Life Of Sunshine">
+  <section class="container section">
+    <p class="eyebrow">Canvas &amp; Digital Artist · Bangalore</p>
+
+    <h1 class="title measure" style="margin-top: var(--space-4);">
+      hi, i'm sunshine. i paint people, pets and the stories behind them.
+    </h1>
+
+    <p class="body-lg measure" style="margin-top: var(--space-5); color: var(--ink-soft);">
+      scroll down for the work — dms are open if you want something made for someone you love.
+    </p>
+
+    <div class="cluster" style="margin-top: var(--space-6);">
+      <a class="btn btn--primary" href="/work">See the work</a>
+      <a class="btn btn--secondary" href="/commissions">Commission a piece</a>
+    </div>
+  </section>
+
+  <section class="container section" style="border-top: 1px solid var(--line);">
+    <p class="eyebrow">Design system check</p>
+    <h2 class="display-2" style="margin-top: var(--space-4);">Display Two</h2>
+    <p class="label" style="margin-top: var(--space-5);">24 × 36 in · Canvas</p>
+    <p class="body measure" style="margin-top: var(--space-4);">
+      Body text on paper. This paragraph exists to confirm the type scale, the measure,
+      and that <a href="/work">links</a> render in sage-deep.
+    </p>
+    <p class="caption" style="margin-top: var(--space-3);">Caption, in ink-muted.</p>
+  </section>
+</Base>

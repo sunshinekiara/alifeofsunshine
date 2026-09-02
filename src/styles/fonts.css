@@ -1,0 +1,64 @@
+/* A Life Of Sunshine — self-hosted faces. Implements DESIGN-SYSTEM.md §3.1.
+ *
+ * Why hand-written @font-face instead of importing the @fontsource-variable CSS:
+ * those packages register the families as "Bodoni Moda Variable" / "DM Sans Variable",
+ * but the token stacks in tokens.css (§12, copied verbatim) ask for "Bodoni Moda" /
+ * "DM Sans". The names never matched, so every face stayed unloaded and the site
+ * silently rendered in Times New Roman and Arial. Declaring the families ourselves
+ * under the names the tokens use is what §3.1 asks for anyway: "@font-face with
+ * font-display: swap, woff2 only, <link rel=preload> for both files".
+ *
+ * Astro v7's built-in `fonts` config is the other option, but it emits a hashed
+ * family name (`<name>-<hash>`, see astro/dist/assets/fonts/core/resolve-family.js),
+ * which would force edits to the verbatim token block. Not worth it here.
+ *
+ * Files come from the installed @fontsource-variable packages — `npm run fonts:sync`
+ * re-copies them, so upgrading the package and re-running is the update path.
+ *
+ * Budget (§3.1, ≤ 90 KB): the two preloaded latin files total 81.2 KB.
+ *   bodoni-moda-latin.woff2   45.2 KB  wght 400–900 + opsz 6–96
+ *   dm-sans-latin.woff2       36.1 KB  wght 100–1000
+ *   dm-sans-latin-ext.woff2   17.8 KB  not preloaded; unicode-range fetches it only
+ *                                      on pages that use a ₹ (U+20B9) or an accent
+ *
+ * Bodoni carries both axes and DM Sans only `wght` on purpose. §3.1 wants opsz for
+ * Bodoni specifically — its hairlines vanish at small sizes on low-DPI Android — and
+ * DM Sans's opsz build costs a further 25.2 KB, which would put the pair at 106 KB
+ * and over budget. A grotesque loses very little without it.
+ */
+
+/* Bodoni Moda — display. Latin only (§3.1). Two axes: wght + opsz. */
+@font-face {
+  font-family: "Bodoni Moda";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("/fonts/bodoni-moda-latin.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* DM Sans — text. Latin. */
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 100 1000;
+  font-display: swap;
+  src: url("/fonts/dm-sans-latin.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* DM Sans — latin-ext. Carries ₹ U+20B9 (inside U+20AD-20C0), which every price needs. */
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 100 1000;
+  font-display: swap;
+  src: url("/fonts/dm-sans-latin-ext.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}

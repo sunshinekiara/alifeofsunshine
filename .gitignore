@@ -49,3 +49,7 @@ sunlife.md
 artwork-metadata.csv
 refs/
 brand/
+
+# Internal build record for the continuous run. Same family as the docs above:
+# local-only, because the repo is public.
+BUILD-LOG.md
