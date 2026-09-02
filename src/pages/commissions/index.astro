@@ -1,0 +1,119 @@
+---
+/**
+ * /commissions — DESIGN-SYSTEM.md §13.
+ *
+ * Order: title → her pitch → three type cards → HOW IT WORKS on a sage band → the general
+ * enquiry form. The form is step 7; until then the section is not rendered rather than showing
+ * an empty box.
+ *
+ * The meta row (`from ₹X · turnaround · deposit ₹Y`) is omitted per §13 because all three
+ * values are blocked on Sunshine — brief.md §2: no commission price exists anywhere public.
+ * Reviewing gerbart.com/pages/commissions (§14.6) turned up a working artist's commissions page
+ * that publishes no numbers at all, so shipping without them is precedented, not a compromise.
+ */
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import CaseStudy from '../../components/CaseStudy.astro';
+import ResponsiveArt from '../../components/ResponsiveArt.astro';
+import { formatPrice } from '../../lib/artwork';
+
+const page = await getEntry('page', 'commissions');
+const { Content } = page ? await render(page) : { Content: null };
+const steps = page?.data.steps ?? [];
+
+const types = (await getCollection('commissionType')).sort(
+  (a, b) => (a.data.order ?? Infinity) - (b.data.order ?? Infinity),
+);
+const caseStudies = (await getCollection('caseStudy')).sort(
+  (a, b) => (a.data.order ?? Infinity) - (b.data.order ?? Infinity),
+);
+const settings = await getEntry('siteConfig', 'site');
+const instagram = settings?.data.instagram ?? 'a_life_of_sunshine';
+---
+
+<Base
+  title="Commissions — A Life Of Sunshine"
+  description="Custom canvas, pet portraits and story pieces. You send a photo; she paints the person in it."
+>
+  <div class="container section">
+    <h1 class="display-2">Commissions</h1>
+    {Content && <div class="prose body-lg measure" style="margin-top: var(--space-4);"><Content /></div>}
+  </div>
+
+  {/* §13 — three type cards, larger than the home versions: 2 columns at md, 1 on mobile. */}
+  {
+    types.length > 0 && (
+      <div class="container">
+        <div class="types">
+          {types.map((type) => (
+            <a class="types__card" href={`/commissions/${type.id}`}>
+              {type.data.heroImage && (
+                <span class="types__frame">
+                  <ResponsiveArt
+                    src={type.data.heroImage}
+                    alt={type.data.title}
+                    widths={[480, 720, 960]}
+                    sizes="(min-width: 48em) 45vw, 100vw"
+                    loading="lazy"
+                  />
+                </span>
+              )}
+              <span class="subheading">{type.data.title}</span>
+              {/* Omitted entirely while her prices and turnaround are unset. */}
+              {(type.data.startingPrice !== undefined || type.data.turnaround) && (
+                <span class="types__meta body-sm">
+                  {[
+                    type.data.startingPrice !== undefined
+                      ? `from ${formatPrice(type.data.startingPrice)}`
+                      : null,
+                    type.data.turnaround,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </span>
+              )}
+            </a>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  {/* §13 — HOW IT WORKS on a --sage band, ink text only (§2.3). */}
+  {
+    steps.length > 0 && (
+      <section class="how">
+        <div class="container">
+          <h2 class="heading">How it works</h2>
+          <ol class="how__steps">
+            {steps.map((s, i) => (
+              <li class="how__step">
+                <span class="how__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                <span class="how__title body">{s.title}</span>
+                {s.detail && <span class="how__detail body-sm">{s.detail}</span>}
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    caseStudies.length > 0 && (
+      <div class="container section">
+        <h2 class="heading">From photo to portrait</h2>
+        <div class="cases">
+          {caseStudies.map((cs) => <CaseStudy caseStudy={cs} />)}
+        </div>
+      </div>
+    )
+  }
+
+  <div class="container section" style="padding-top: 0;">
+    <p class="body-lg measure">
+      dms are open —{' '}
+      <a href={`https://www.instagram.com/${instagram}/`} rel="noopener">@{instagram}</a>
+    </p>
+  </div>
+</Base>

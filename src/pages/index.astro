@@ -8,10 +8,10 @@
  *   5. featured case study — needs caseStudy entries (step 5)
  *   6. next event band     — needs event entries (step 6)
  */
-import { Image } from 'astro:assets';
 import { getCollection, getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Gallery from '../components/Gallery.astro';
+import CaseStudy from '../components/CaseStudy.astro';
 import ResponsiveArt from '../components/ResponsiveArt.astro';
 import { detailAlt, sortArtworks } from '../lib/artwork';
 import { formatPrice } from '../lib/artwork';
@@ -30,6 +30,11 @@ const featuredGrid = (heroArtwork ? featured.slice(1) : featured).slice(0, 6);
 const commissionTypes = (await getCollection('commissionType')).sort(
   (a, b) => (a.data.order ?? Infinity) - (b.data.order ?? Infinity),
 );
+
+// §13 item 5 — one featured case study, the lowest `order`.
+const featuredCase = (await getCollection('caseStudy')).sort(
+  (a, b) => (a.data.order ?? Infinity) - (b.data.order ?? Infinity),
+)[0];
 
 const greeting = hero.greeting ?? 'hi, i’m sunshine. i paint people, pets and the stories behind them.';
 const line = hero.line ?? 'scroll down for the work — dms are open if you want something made for someone you love.';
@@ -96,16 +101,12 @@ const line = hero.line ?? 'scroll down for the work — dms are open if you want
             <a class="what-i-do__card" href={`/commissions/${type.id}`}>
               {type.data.heroImage && (
                 <span class="what-i-do__frame">
-                  <Image
+                  <ResponsiveArt
                     src={type.data.heroImage}
                     alt={type.data.title}
                     widths={[320, 480, 640]}
                     sizes="(min-width: 48em) calc((100vw - 96px) / 3), calc(100vw - 32px)"
-                    formats={['avif', 'webp']}
-                    quality={72}
-                    layout="none"
                     loading="lazy"
-                    decoding="async"
                   />
                 </span>
               )}
@@ -118,6 +119,19 @@ const line = hero.line ?? 'scroll down for the work — dms are open if you want
             </a>
           ))}
         </div>
+      </section>
+    )
+  }
+
+  {/* ---- 5. One featured case study (§7.4). ---- */}
+  {
+    featuredCase && (
+      <section class="container section">
+        <div class="section-head">
+          <h2 class="heading">From photo to portrait</h2>
+          <a class="btn--text" href="/commissions">all commissions →</a>
+        </div>
+        <CaseStudy caseStudy={featuredCase} />
       </section>
     )
   }

@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "node scripts/build-card-derivatives.mjs && astro build",
-    "preview": "astro preview",
+    "preview": "astro preview --port 4322",
     "astro": "astro",
     "fonts:sync": "node scripts/sync-fonts.mjs",
     "art:masters": "node scripts/build-web-masters.mjs",

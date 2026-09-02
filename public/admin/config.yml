@@ -357,6 +357,32 @@ collections:
   - name: page
     label: Pages
     files:
+      - name: commissions
+        label: Commissions page
+        file: src/content/pages/commissions.md
+        media_folder: '../../assets/art'
+        public_folder: '../../assets/art'
+        description: The intro line and the "how it works" steps on your commissions page.
+        fields:
+          - { name: title, label: heading, widget: string }
+          - name: body
+            label: intro line
+            widget: markdown
+            required: false
+            hint: One or two lines under the heading.
+          - name: steps
+            label: how it works
+            widget: list
+            required: false
+            label_singular: step
+            summary: '{{fields.title}}'
+            hint: >-
+              These are your four steps from the art book. Numbered automatically. Leave the
+              list empty and the whole green band disappears.
+            fields:
+              - { name: title, label: step, widget: string }
+              - { name: detail, label: extra detail, widget: string, required: false }
+
       - name: about
         label: About page
         file: src/content/pages/about.md

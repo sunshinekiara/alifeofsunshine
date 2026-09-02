@@ -1,0 +1,109 @@
+---
+/**
+ * "From photo to portrait" — DESIGN-SYSTEM.md §7.4. Her strongest existing content.
+ *
+ * Desktop 12-column: photo 1–4, process 5–8, painting 9–12. Mobile stacks photo → process →
+ * painting. §7.4's empty states are the ones actually in use here:
+ *   - no referenceImage  -> two columns, 5/7, and THE PHOTO eyebrow is not rendered
+ *   - no notes and no quote -> the process column goes, photo and painting sit 6/6
+ * None of her case studies has a reference photo yet (see BUILD-LOG step 5), so every block
+ * currently takes the first branch.
+ */
+import { getEntry } from 'astro:content';
+import ResponsiveArt from './ResponsiveArt.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  caseStudy: CollectionEntry<'caseStudy'>;
+}
+const { caseStudy } = Astro.props;
+const d = caseStudy.data;
+
+// §7.4 overflow: more than six notes renders the first six and warns.
+const notes = d.notes.slice(0, 6);
+if (d.notes.length > 6) {
+  console.warn(
+    `[case-study] ${caseStudy.id} has ${d.notes.length} notes; §7.4 renders the first 6.`,
+  );
+}
+
+const hasPhoto = Boolean(d.referenceImage);
+const hasProcess = notes.length > 0 || Boolean(d.quote);
+
+const linked = d.finalArtwork ? await getEntry(d.finalArtwork) : undefined;
+
+const SIZES = '(min-width: 48em) 30vw, 100vw';
+---
+
+<article
+  class="case"
+  data-photo={hasPhoto ? 'true' : 'false'}
+  data-process={hasProcess ? 'true' : 'false'}
+>
+  {
+    hasPhoto && (
+      <div class="case__col case__col--photo">
+        <p class="eyebrow">The photo</p>
+        {/* §9.2 — a photograph always carries the 1px hairline; a painting never does. */}
+        <div class="case__frame case__frame--photo">
+          <ResponsiveArt
+            src={d.referenceImage!}
+            alt={`the reference photo for ${d.title}`}
+            widths={[480, 720, 960]}
+            sizes={SIZES}
+            loading="lazy"
+          />
+        </div>
+      </div>
+    )
+  }
+
+  {
+    hasProcess && (
+      <div class="case__col case__col--process">
+        <p class="eyebrow">The process</p>
+        <h3 class="subheading case__title">{d.title}</h3>
+        {
+          notes.length > 0 && (
+            <ol class="case__notes">
+              {notes.map((n, i) => (
+                <li class="case__note body">
+                  <span class="case__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  {n.text}
+                </li>
+              ))}
+            </ol>
+          )
+        }
+        {d.quote && <p class="case__quote body-lg">{d.quote}</p>}
+      </div>
+    )
+  }
+
+  <div class="case__col case__col--painting">
+    <p class="eyebrow">The painting</p>
+    {
+      linked ? (
+        <a class="case__frame case__link" href={`/work/${linked.id}`}>
+          <ResponsiveArt
+            src={d.finalImage}
+            alt={`${d.title} — the finished painting`}
+            widths={[480, 720, 960]}
+            sizes={SIZES}
+            loading="lazy"
+          />
+        </a>
+      ) : (
+        <div class="case__frame">
+          <ResponsiveArt
+            src={d.finalImage}
+            alt={`${d.title} — the finished painting`}
+            widths={[480, 720, 960]}
+            sizes={SIZES}
+            loading="lazy"
+          />
+        </div>
+      )
+    }
+  </div>
+</article>

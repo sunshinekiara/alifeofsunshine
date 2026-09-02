@@ -209,6 +209,9 @@ const page = defineCollection({
       press: z
         .array(z.object({ text: z.string(), link: z.string().optional() }))
         .default([]),
+      /** §13 /commissions — the numbered "HOW IT WORKS" steps on the sage band, in her words.
+       *  Taken verbatim from the Process Overview page of her art book. */
+      steps: z.array(z.object({ title: z.string(), detail: z.string().optional() })).default([]),
     }),
 });
 

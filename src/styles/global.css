@@ -646,3 +646,117 @@ a:hover { color: var(--ink); }
  * cards would have no caption line and the rows would sit unevenly. Remove this once she has
  * filled the CSV in. */
 .cell__label { min-height: 1lh; }
+
+/* ---- Commission type cards (§13) ---- */
+.types { display: grid; gap: var(--space-6); margin-top: var(--space-6); }
+@media (min-width: 48em) { .types { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.types__card { display: block; text-decoration: none; color: inherit; }
+.types__card > * + * { margin-top: var(--space-2); display: block; }
+.types__frame {
+  position: relative;
+  aspect-ratio: var(--cell-ratio);
+  background: var(--paper);
+  display: block;
+  margin-bottom: var(--space-3);
+}
+.types__frame picture { display: contents; }
+.types__frame img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+}
+.types__meta { color: var(--ink-soft); }
+.types__card:hover .subheading {
+  text-decoration: underline; text-decoration-color: var(--sage-deep);
+  text-underline-offset: 0.15em;
+}
+
+/* ---- HOW IT WORKS (§13). The one sage band on the page — ink text only (§2.3), and it is
+ * kept --section-gap clear of any artwork (principle 2). ---- */
+.how {
+  background: var(--sage);
+  color: var(--ink);
+  padding-block: var(--space-8);
+  margin-top: var(--section-gap);
+}
+.how .heading { color: var(--ink); }
+.how__steps {
+  display: grid; gap: var(--space-6);
+  margin-top: var(--space-6);
+}
+@media (min-width: 48em) { .how__steps { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.how__step { display: block; }
+.how__num {
+  display: block;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 1.5rem; line-height: 1;
+  color: var(--ink);
+  margin-bottom: var(--space-2);
+}
+.how__title { display: block; color: var(--ink); }
+.how__detail { display: block; margin-top: var(--space-1); color: var(--ink); }
+
+/* ---- Case study block (§7.4) ---- */
+.cases { display: grid; gap: var(--section-gap); margin-top: var(--space-6); }
+.case { display: grid; gap: var(--space-6); }
+.case__col > * + * { margin-top: var(--space-3); }
+.case__frame {
+  position: relative;
+  aspect-ratio: var(--cell-ratio);
+  background: var(--paper);
+  display: block;
+}
+.case__frame picture { display: contents; }
+.case__frame img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+}
+/* §9.2 / §7.4 — the hairline is what tells a viewer "photo, not painting". */
+.case__frame--photo { border: 1px solid var(--line); }
+.case__link { text-decoration: none; }
+.case__link:hover ~ * { text-decoration: none; }
+.case__col--painting:hover .eyebrow {
+  text-decoration: underline; text-decoration-color: var(--sage-deep);
+  text-underline-offset: 0.15em;
+}
+.case__notes { display: grid; gap: var(--space-4); }
+.case__note { position: relative; padding-left: 2.5rem; }
+.case__num {
+  position: absolute; left: 0; top: 0;
+  font-family: var(--font-display); font-weight: 500;
+  color: var(--sage-deep);
+}
+.case__quote {
+  color: var(--ink-soft);
+  border-left: 2px solid var(--sage);
+  padding-left: var(--space-4);
+  font-style: normal;   /* §7.4 — no italics anywhere on the site; the budget has no italic file */
+}
+
+@media (min-width: 48em) {
+  .case { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gutter); }
+  /* Full anatomy: photo 1-4, process 5-8, painting 9-12. */
+  .case[data-photo='true'][data-process='true'] .case__col--photo { grid-column: 1 / span 4; }
+  .case[data-photo='true'][data-process='true'] .case__col--process { grid-column: 5 / span 4; }
+  .case[data-photo='true'][data-process='true'] .case__col--painting { grid-column: 9 / span 4; }
+  /* §7.4 empty state — no reference photo: process left 5, painting right 7. */
+  .case[data-photo='false'][data-process='true'] .case__col--process { grid-column: 1 / span 5; }
+  .case[data-photo='false'][data-process='true'] .case__col--painting { grid-column: 6 / span 7; }
+  /* §7.4 empty state — no process: photo and painting 6/6. */
+  .case[data-photo='true'][data-process='false'] .case__col--photo { grid-column: 1 / span 6; }
+  .case[data-photo='true'][data-process='false'] .case__col--painting { grid-column: 7 / span 6; }
+  .case[data-photo='false'][data-process='false'] .case__col--painting { grid-column: 1 / span 12; }
+}
+/* §7.4 mobile caps so the visitor reaches the painting within a screen and a half. */
+@media (max-width: 47.99em) {
+  .case__frame--photo { max-height: 50vh; }
+  .case__col--painting .case__frame { max-height: 78vh; }
+}
+
+.included { display: grid; gap: var(--space-2); }
+.included li { position: relative; padding-left: var(--space-5); }
+.included li::before {
+  content: ''; position: absolute; left: 0; top: 0.6em;
+  width: 8px; height: 8px; border: 1px solid var(--sage-deep); border-radius: 50%;
+}

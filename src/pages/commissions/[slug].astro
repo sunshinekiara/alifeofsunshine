@@ -1,0 +1,115 @@
+---
+/**
+ * /commissions/[slug] — DESIGN-SYSTEM.md §13.
+ *
+ * eyebrow COMMISSION → title → meta row (from ₹X · turnaround · deposit ₹Y, each omitted if
+ * missing, whole row omitted if all missing) → description → WHAT'S INCLUDED → case studies
+ * (§7.4) → EXAMPLES gallery → enquiry form (step 7).
+ *
+ * The meta row is currently omitted on every type: all three values are blocked on Sunshine.
+ */
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import CaseStudy from '../../components/CaseStudy.astro';
+import Gallery from '../../components/Gallery.astro';
+import { formatPrice, sortArtworks } from '../../lib/artwork';
+
+export async function getStaticPaths() {
+  const types = await getCollection('commissionType');
+  return types.map((type) => ({ params: { slug: type.id }, props: { type } }));
+}
+
+const { type } = Astro.props;
+const { Content } = await render(type);
+const hasDescription = Boolean(type.body && type.body.trim().length > 0);
+
+const meta = [
+  type.data.startingPrice !== undefined ? `from ${formatPrice(type.data.startingPrice)}` : null,
+  type.data.turnaround,
+  type.data.depositAmount !== undefined ? `deposit ${formatPrice(type.data.depositAmount)}` : null,
+].filter(Boolean) as string[];
+
+const caseStudies = (await getCollection('caseStudy'))
+  .filter((cs) => cs.data.commissionType?.id === type.id)
+  .sort((a, b) => (a.data.order ?? Infinity) - (b.data.order ?? Infinity));
+
+// `examples` are references; resolve them to entries.
+const all = await getCollection('artwork');
+const examples = sortArtworks(
+  type.data.examples
+    .map((ref) => all.find((a) => a.id === ref.id))
+    .filter(Boolean) as typeof all,
+);
+
+const settings = await getEntry('siteConfig', 'site');
+const instagram = settings?.data.instagram ?? 'a_life_of_sunshine';
+---
+
+<Base
+  title={`${type.data.title} — A Life Of Sunshine`}
+  description={`${type.data.title} commissions by Sunshine Kiara Bhandary, Bangalore.`}
+>
+  <div class="container section">
+    <p class="eyebrow">Commission</p>
+    <h1 class="display-2" style="margin-top: var(--space-2);">{type.data.title}</h1>
+
+    {meta.length > 0 && <p class="body-sm" style="margin-top: var(--space-4);">{meta.join(' · ')}</p>}
+
+    {
+      hasDescription && (
+        <div class="prose body-lg measure" style="margin-top: var(--space-5);">
+          <Content />
+        </div>
+      )
+    }
+
+    {
+      type.data.whatsIncluded.length > 0 && (
+        <section style="margin-top: var(--section-gap);">
+          <h2 class="heading">What's included</h2>
+          <ul class="included body" style="margin-top: var(--space-4);">
+            {type.data.whatsIncluded.map((item) => <li>{item}</li>)}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+
+  {
+    caseStudies.length > 0 && (
+      <div class="container section" style="padding-top: 0;">
+        <h2 class="heading">From photo to portrait</h2>
+        <div class="cases">
+          {caseStudies.map((cs) => <CaseStudy caseStudy={cs} />)}
+        </div>
+      </div>
+    )
+  }
+
+  {/* §13 — the examples gallery is omitted when it is empty and case studies carry the page. */}
+  {
+    examples.length > 0 && (
+      <div class="container section" style="padding-top: 0;">
+        <h2 class="heading">Examples</h2>
+        <div style="margin-top: var(--space-5);">
+          <Gallery artworks={examples} emptyText={null} />
+        </div>
+      </div>
+    )
+  }
+
+  {
+    caseStudies.length === 0 && examples.length === 0 && (
+      <div class="container section" style="padding-top: 0;">
+        <p class="body">examples coming soon — dm me and i'll send some</p>
+      </div>
+    )
+  }
+
+  <div class="container section" style="padding-top: 0;">
+    <p class="body-lg measure">
+      dms are open —{' '}
+      <a href={`https://www.instagram.com/${instagram}/`} rel="noopener">@{instagram}</a>
+    </p>
+  </div>
+</Base>
