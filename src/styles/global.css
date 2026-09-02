@@ -817,3 +817,75 @@ a:hover { color: var(--ink); }
   text-decoration-color: var(--ink);
   text-underline-offset: 0.5em;
 }
+
+/* ---- Enquiry form (§7.3) ---- */
+.enquiry__honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* The disclosure's summary IS §7.2's secondary button. Marker removed both ways. */
+.enquiry__summary { list-style: none; width: 100%; }
+.enquiry__summary::-webkit-details-marker { display: none; }
+.enquiry__summary::marker { content: ''; }
+
+/* §7.2 — closed, the disclosure reads as the second button in the action row; open, it takes
+ * the whole row so the fields are full width. */
+.buy__enquire { min-width: 0; }
+@media (min-width: 40em) {
+  .buy__enquire[open] { grid-column: 1 / -1; }
+}
+
+.enquiry__body > * + * { margin-top: var(--space-5); }
+.enquiry[open] .enquiry__body,
+.enquiry--open .enquiry__body { margin-top: var(--space-5); }
+
+.field { display: grid; gap: 4px; }
+.field > label {
+  font-size: var(--text-body-sm);
+  color: var(--ink-soft);
+}
+.field > .caption { margin-top: var(--space-1); }
+
+:where(.field) :where(input[type='text'], input[type='email'], input[type='tel'], textarea, select) {
+  font-family: var(--font-text);
+  font-size: var(--text-body);       /* 16px — anything smaller and iOS zooms on focus (§3.2) */
+  line-height: var(--leading-body);
+  padding: var(--space-3) var(--space-4);
+  min-height: var(--control-height);
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  width: 100%;
+}
+:where(.field) textarea {
+  field-sizing: content;             /* grows with the text where supported */
+  max-height: 40vh;                  /* then scrolls (§7.3 overflow) */
+  resize: vertical;
+}
+:where(.field) ::placeholder { color: var(--ink-muted); }
+:where(.field) :where(input, textarea, select):focus-visible {
+  border-color: var(--ink);
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+:where(.field) input[type='file'] {
+  font-size: var(--text-body-sm);
+  padding: var(--space-2) 0;
+  border: 0;
+  background: none;
+}
+
+/* §7.3 — validation only after a submit attempt, via :user-invalid, never :invalid. */
+:where(.field) :where(input, textarea):user-invalid {
+  border-color: var(--error);
+}
+:where(.field) :where(input, textarea):user-invalid + .field__error { display: block; }
+.field__error { display: none; font-size: var(--text-caption); color: var(--error); }
+
+.enquiry__actions .btn { width: 100%; }
+@media (min-width: 40em) { .enquiry__actions .btn { width: auto; } }
+.enquiry__dm { color: var(--ink-muted); }
+
+/* §8.3 — smooth scrolling exists only for the #enquire jump, and only when motion is allowed. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}

@@ -1,0 +1,26 @@
+---
+// /contact — DESIGN-SYSTEM.md §13. The form is open here, not in a <details> (§7.3).
+import { getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import EnquiryForm from '../components/EnquiryForm.astro';
+
+const settings = await getEntry('siteConfig', 'site');
+const instagram = settings?.data.instagram ?? 'a_life_of_sunshine';
+---
+<Base title="Say hi — A Life Of Sunshine" description="Get in touch with Sunshine Kiara Bhandary.">
+  <div class="container container--text section">
+    <h1 class="display-2">Say hi</h1>
+    <p class="body-lg measure" style="margin-top: var(--space-4);">
+      about a piece, a commission, or nothing in particular — write below and i'll come back to you.
+    </p>
+
+    <div style="margin-top: var(--space-6);">
+      <EnquiryForm name="general-enquiry" mode="form" instagram={instagram} />
+    </div>
+
+    <p class="body" style="margin-top: var(--space-6);">
+      or on instagram →{' '}
+      <a href={`https://www.instagram.com/${instagram}/`} rel="noopener">@{instagram}</a>
+    </p>
+  </div>
+</Base>

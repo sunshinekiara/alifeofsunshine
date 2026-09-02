@@ -31,6 +31,7 @@ const navLinks = [
   { href: '/commissions', label: 'Commissions' },
   { href: '/events', label: 'Events' },
   { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
 ];
 const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
 ---
@@ -94,9 +95,9 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
             <a class="wordmark" href="/">A Life Of Sunshine</a>
           </div>
 
-          {/* §7.8 puts about/contact in the right-hand group on desktop. `about` stays in
-              this row until /contact exists to sit beside it — one row of real links beats a
-              link to a 404. */}
+          {/* §7.8 puts about/contact in a right-hand group on desktop. They are in this one
+              row instead: the right slot holds the Instagram glyph and the reserved phase-2 bag,
+              and splitting six links across two groups at 12px caps would crowd the lockup. */}
           <div class="nav__links">
             {navLinks.map((l) => (
               <a

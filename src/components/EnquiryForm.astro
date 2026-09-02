@@ -1,0 +1,188 @@
+---
+/**
+ * The one enquiry form — DESIGN-SYSTEM.md §7.3. Netlify Forms, no backend (brief.md §8).
+ *
+ * Three uses, three Netlify form names:
+ *   artwork-enquiry     on /work/[slug]      — inside the buy block's <form>, in a <details>
+ *   commission-enquiry  on /commissions[/x]  — its own <form>, open
+ *   general-enquiry     on /contact          — its own <form>, open
+ *
+ * `fields` mode renders only the disclosure and the inputs, with no <form> of its own, because
+ * §7.2 makes the buy block itself the form so the print size a visitor picks with zero
+ * JavaScript is posted along with the enquiry. Two nested forms are not possible, so on artwork
+ * pages this component supplies the fields and the buy block supplies the form.
+ *
+ * Netlify requirements, checked against their docs rather than remembered: `name`,
+ * `method="POST"`, `data-netlify="true"`, every input carries a `name`, `action` points at the
+ * success page, file uploads need `enctype="multipart/form-data"`, and the honeypot is declared
+ * with `data-netlify-honeypot`.
+ */
+interface Props {
+  /** Netlify form name. */
+  name: 'artwork-enquiry' | 'commission-enquiry' | 'general-enquiry';
+  /** 'form' = its own open <form>. 'fields' = disclosure + inputs only, for inside the buy block. */
+  mode: 'form' | 'fields';
+  /** What the visitor was looking at — §7.3 truncates long titles to 120 characters. */
+  context?: string;
+  contextSlug?: string;
+  instagram: string;
+  /** §7.3 — commission forms add a type select, a size field and reference-photo uploads. */
+  commission?: boolean;
+  commissionTypes?: { id: string; title: string }[];
+  /** Label on the disclosure button in 'fields' mode. */
+  summaryLabel?: string;
+}
+
+const {
+  name,
+  mode,
+  context = 'general',
+  contextSlug,
+  instagram,
+  commission = false,
+  commissionTypes = [],
+  summaryLabel = 'Enquire about this piece',
+} = Astro.props;
+
+// §7.3 — the message is optional on artwork enquiries, required on commission and general ones.
+const messageRequired = name !== 'artwork-enquiry';
+const messagePlaceholder =
+  name === 'artwork-enquiry'
+    ? "is this still available? / can it be framed? / anything at all"
+    : undefined;
+---
+
+{/* The inputs, shared by both modes. */}
+<Fragment>
+  {
+    mode === 'fields' ? (
+      <details class="buy__enquire enquiry" id="enquire">
+        <summary class="btn btn--secondary enquiry__summary">{summaryLabel}</summary>
+        <div class="enquiry__body">
+          <slot name="fields-before" />
+          <p class="field">
+            <label for={`${name}-name`}>your name</label>
+            <input id={`${name}-name`} name="name" type="text" required autocomplete="name" />
+          </p>
+          <p class="field">
+            <label for={`${name}-email`}>email</label>
+            <input id={`${name}-email`} name="email" type="email" required autocomplete="email" />
+          </p>
+          <p class="field">
+            <label for={`${name}-phone`}>phone / whatsapp (optional)</label>
+            <input id={`${name}-phone`} name="phone" type="tel" inputmode="tel" autocomplete="tel" />
+          </p>
+          <p class="field">
+            <label for={`${name}-message`}>tell me about it</label>
+            <textarea
+              id={`${name}-message`}
+              name="message"
+              rows="5"
+              required={messageRequired}
+              placeholder={messagePlaceholder}
+            />
+          </p>
+          <p class="enquiry__actions">
+            <button class="btn btn--primary" type="submit">Send</button>
+          </p>
+          <p class="caption enquiry__dm">
+            or just dm me —{' '}
+            <a href={`https://www.instagram.com/${instagram}/`} rel="noopener">@{instagram}</a>
+          </p>
+        </div>
+      </details>
+    ) : (
+      <form
+        class="enquiry enquiry--open"
+        id="enquire"
+        name={name}
+        method="POST"
+        action="/thanks"
+        data-netlify="true"
+        data-netlify-honeypot="bot-field"
+        enctype={commission ? 'multipart/form-data' : undefined}
+      >
+        {/* §7.3 hidden fields. Netlify injects form-name itself for static forms; it is stated
+            here too because §7.3 lists it and the value is identical either way. */}
+        <input type="hidden" name="form-name" value={name} />
+        <input type="hidden" name="context" value={context.slice(0, 120)} />
+        {contextSlug && <input type="hidden" name="context-slug" value={contextSlug} />}
+        <p class="enquiry__honeypot">
+          <label>don’t fill this in <input name="bot-field" /></label>
+        </p>
+
+        <div class="enquiry__body">
+          <p class="field">
+            <label for={`${name}-name`}>your name</label>
+            <input id={`${name}-name`} name="name" type="text" required autocomplete="name" />
+          </p>
+          <p class="field">
+            <label for={`${name}-email`}>email</label>
+            <input id={`${name}-email`} name="email" type="email" required autocomplete="email" />
+          </p>
+          <p class="field">
+            <label for={`${name}-phone`}>phone / whatsapp (optional)</label>
+            <input id={`${name}-phone`} name="phone" type="tel" inputmode="tel" autocomplete="tel" />
+          </p>
+
+          {
+            commission && (
+              <>
+                <p class="field">
+                  <label for={`${name}-type`}>what kind of piece</label>
+                  <select id={`${name}-type`} name="piece-type">
+                    {commissionTypes.map((t) => (
+                      <option value={t.id} selected={t.id === contextSlug}>{t.title}</option>
+                    ))}
+                    <option value="not-sure">not sure yet</option>
+                  </select>
+                </p>
+                <p class="field">
+                  <label for={`${name}-size`}>size you’re thinking of</label>
+                  <input id={`${name}-size`} name="size-wanted" type="text" />
+                </p>
+              </>
+            )
+          }
+
+          <p class="field">
+            <label for={`${name}-message`}>tell me about it</label>
+            <textarea
+              id={`${name}-message`}
+              name="message"
+              rows="5"
+              required={messageRequired}
+              placeholder={messagePlaceholder}
+            />
+          </p>
+
+          {
+            commission && (
+              <p class="field">
+                <label for={`${name}-photos`}>reference photos</label>
+                <input
+                  id={`${name}-photos`}
+                  name="photos"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                />
+                <span class="caption">
+                  or send them on instagram after — whatever’s easier. up to 8 MB in total.
+                </span>
+              </p>
+            )
+          }
+
+          <p class="enquiry__actions">
+            <button class="btn btn--primary" type="submit">Send</button>
+          </p>
+          <p class="caption enquiry__dm">
+            or just dm me —{' '}
+            <a href={`https://www.instagram.com/${instagram}/`} rel="noopener">@{instagram}</a>
+          </p>
+        </div>
+      </form>
+    )
+  }
+</Fragment>

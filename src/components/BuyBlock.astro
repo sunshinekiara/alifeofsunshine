@@ -6,12 +6,13 @@
  * Instagram action is a plain <a>. §7.2's phase-2 contract: the primary slot stays exactly one
  * interactive element at 48px and full slot width — only its label changes when the cart lands.
  *
- * The secondary "ENQUIRE INSTEAD" slot is not here yet: the enquiry form is step 7, and a button
- * pointing at an #enquire anchor that does not exist would be worse than one button. §7.2's own
- * empty case already covers the shape.
+ * The secondary slot is the enquiry disclosure's own <summary> (§7.3), which sits inside this
+ * form so the selected print size posts with the enquiry. Closed it reads as the second button;
+ * open it takes the full row and the fields appear beneath.
  */
 import PrintSizeGuide from './PrintSizeGuide.astro';
 import Badge from './Badge.astro';
+import EnquiryForm from './EnquiryForm.astro';
 import { PRINT_DIMENSIONS, formatPrice, hasPrints, orderedSizes } from '../lib/artwork';
 import type { Artwork } from '../lib/artwork';
 
@@ -21,8 +22,18 @@ interface Props {
   shippingRegions?: string;
   printPaper?: string;
   processingTime?: string;
+  /** brief.md §8 — the phase-2 switch. False for the whole of phase 1: the primary slot is a
+   *  DM link, never "Add to bag". Wired here so flipping the flag is the only change needed. */
+  commerceEnabled?: boolean;
 }
-const { artwork, instagram, shippingRegions, printPaper, processingTime } = Astro.props;
+const {
+  artwork,
+  instagram,
+  shippingRegions,
+  printPaper,
+  processingTime,
+  commerceEnabled = false,
+} = Astro.props;
 
 const original = artwork.data.original;
 const showOriginal = Boolean(original?.forSale || original?.status);
@@ -52,12 +63,20 @@ const printCaption = [printPaper, processingTime ? `ships in ${processingTime}` 
   .join(' · ');
 ---
 
-<form class="buy" name="artwork-enquiry" method="POST" data-netlify="true">
-  {/* Netlify Forms plumbing. The visible enquiry fields arrive at step 7. */}
+<form
+  class="buy"
+  name="artwork-enquiry"
+  method="POST"
+  action="/thanks"
+  data-netlify="true"
+  data-netlify-honeypot="bot-field"
+>
+  {/* Netlify Forms plumbing. `context` is the artwork so she knows what the enquiry is about
+      without asking (§7.3), truncated to 120 characters per §7.3's overflow rule. */}
   <input type="hidden" name="form-name" value="artwork-enquiry" />
   <input type="hidden" name="context" value={artwork.data.title.slice(0, 120)} />
   <input type="hidden" name="context-slug" value={artwork.id} />
-  <p class="buy__honeypot"><label>don’t fill this in <input name="bot-field" /></label></p>
+  <p class="enquiry__honeypot"><label>don’t fill this in <input name="bot-field" /></label></p>
 
   {
     showOriginal && (
@@ -102,7 +121,24 @@ const printCaption = [printPaper, processingTime ? `ships in ${processingTime}` 
   }
 
   <div class="buy__actions">
-    <a class="btn btn--primary" href={dmHref} rel="noopener">{primaryLabel}</a>
+    {
+      commerceEnabled ? (
+        /* Phase 2 — the identical slot, a submit button instead of a link (§7.2). Never
+           reached while commerceEnabled is false, which is all of phase 1. */
+        <button class="btn btn--primary" type="submit">Add to bag</button>
+      ) : (
+        <a class="btn btn--primary" href={dmHref} rel="noopener">{primaryLabel}</a>
+      )
+    }
+
+    {/* §7.2 secondary slot — the disclosure's own summary, so it reads as the second button
+        when closed and expands to the full row when open. */}
+    <EnquiryForm
+      name="artwork-enquiry"
+      mode="fields"
+      instagram={instagram}
+      summaryLabel="Enquire instead"
+    />
   </div>
 
   {showTrust && (

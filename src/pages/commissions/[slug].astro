@@ -12,6 +12,7 @@ import { getCollection, getEntry, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import CaseStudy from '../../components/CaseStudy.astro';
 import Gallery from '../../components/Gallery.astro';
+import EnquiryForm from '../../components/EnquiryForm.astro';
 import { formatPrice, sortArtworks } from '../../lib/artwork';
 
 export async function getStaticPaths() {
@@ -43,6 +44,7 @@ const examples = sortArtworks(
 
 const settings = await getEntry('siteConfig', 'site');
 const instagram = settings?.data.instagram ?? 'a_life_of_sunshine';
+const allTypes = await getCollection('commissionType');
 ---
 
 <Base
@@ -106,10 +108,21 @@ const instagram = settings?.data.instagram ?? 'a_life_of_sunshine';
     )
   }
 
+  {/* §13 — enquiry form open, with this commission type preselected. */}
   <div class="container section" style="padding-top: 0;">
-    <p class="body-lg measure">
-      dms are open —{' '}
-      <a href={`https://www.instagram.com/${instagram}/`} rel="noopener">@{instagram}</a>
-    </p>
+    <h2 class="heading">Start a commission</h2>
+    <div style="margin-top: var(--space-5);">
+      <EnquiryForm
+        name="commission-enquiry"
+        mode="form"
+        context={type.data.title}
+        contextSlug={type.id}
+        instagram={instagram}
+        commission={true}
+        commissionTypes={allTypes
+          .sort((a, b) => (a.data.order ?? Infinity) - (b.data.order ?? Infinity))
+          .map((t) => ({ id: t.id, title: t.data.title }))}
+      />
+    </div>
   </div>
 </Base>

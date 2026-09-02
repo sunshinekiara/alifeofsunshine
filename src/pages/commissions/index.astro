@@ -14,6 +14,7 @@
 import { getCollection, getEntry, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import CaseStudy from '../../components/CaseStudy.astro';
+import EnquiryForm from '../../components/EnquiryForm.astro';
 import ResponsiveArt from '../../components/ResponsiveArt.astro';
 import { formatPrice } from '../../lib/artwork';
 
@@ -110,10 +111,17 @@ const instagram = settings?.data.instagram ?? 'a_life_of_sunshine';
     )
   }
 
+  {/* §13 — the general commission enquiry form, open rather than in a <details>. */}
   <div class="container section" style="padding-top: 0;">
-    <p class="body-lg measure">
-      dms are open —{' '}
-      <a href={`https://www.instagram.com/${instagram}/`} rel="noopener">@{instagram}</a>
-    </p>
+    <h2 class="heading">Start a commission</h2>
+    <div style="margin-top: var(--space-5);">
+      <EnquiryForm
+        name="commission-enquiry"
+        mode="form"
+        instagram={instagram}
+        commission={true}
+        commissionTypes={types.map((t) => ({ id: t.id, title: t.data.title }))}
+      />
+    </div>
   </div>
 </Base>
