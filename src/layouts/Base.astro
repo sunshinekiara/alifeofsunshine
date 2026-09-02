@@ -21,6 +21,18 @@ const announcement = settings?.data.announcement;
 const showAnnouncement = Boolean(announcement?.active && announcement.text);
 const instagram = settings?.data.instagram ?? 'a_life_of_sunshine';
 const shippingRegions = settings?.data.shippingRegions;
+
+// §7.8 — the left link row, and the current-section underline. `/contact` joins at step 7.
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const navLinks = [
+  { href: '/work', label: 'Work' },
+  { href: '/prints', label: 'Prints' },
+  { href: '/originals', label: 'Originals' },
+  { href: '/commissions', label: 'Commissions' },
+  { href: '/events', label: 'Events' },
+  { href: '/about', label: 'About' },
+];
+const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
 ---
 
 <!doctype html>
@@ -82,13 +94,19 @@ const shippingRegions = settings?.data.shippingRegions;
             <a class="wordmark" href="/">A Life Of Sunshine</a>
           </div>
 
-          {/* §7.8 puts about/contact in the right-hand group on desktop. They stay
-              in this row until /contact exists — one row of real links beats a link
-              to a 404. */}
+          {/* §7.8 puts about/contact in the right-hand group on desktop. `about` stays in
+              this row until /contact exists to sit beside it — one row of real links beats a
+              link to a 404. */}
           <div class="nav__links">
-            <a href="/work">Work</a>
-            <a href="/commissions">Commissions</a>
-            <a href="/about">About</a>
+            {navLinks.map((l) => (
+              <a
+                href={l.href}
+                class:list={{ 'is-current': isCurrent(l.href) }}
+                aria-current={isCurrent(l.href) ? 'page' : undefined}
+              >
+                {l.label}
+              </a>
+            ))}
           </div>
 
           <div class="nav__utility">

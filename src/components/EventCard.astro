@@ -1,0 +1,63 @@
+---
+/**
+ * Event card — DESIGN-SYSTEM.md §7.5.
+ *
+ * Horizontal: a date block, then the detail. At md+ an optional image becomes a third column.
+ * The image carries the 1px `--line` photo hairline (§9.2) because it is a poster or a
+ * photograph, not a painting.
+ */
+import { render } from 'astro:content';
+import Badge from './Badge.astro';
+import ResponsiveArt from './ResponsiveArt.astro';
+import { dateBlock, isUpcoming } from '../lib/events';
+import type { Event } from '../lib/events';
+
+interface Props {
+  event: Event;
+}
+const { event } = Astro.props;
+
+const upcoming = isUpcoming(event);
+const d = dateBlock(event);
+const showYear = d.year !== new Date().getFullYear();
+const place = [event.data.venue, event.data.city].filter(Boolean).join(' · ');
+
+const { Content } = await render(event);
+const hasBody = Boolean(event.body && event.body.trim().length > 0);
+---
+
+<article class:list={['event', { 'event--has-image': Boolean(event.data.image) }]}>
+  <div class="event__date">
+    <span class:list={['event__day', { 'event__day--spans': d.spans }]}>{d.day}</span>
+    {d.month && <span class="eyebrow event__month">{d.month}</span>}
+    {showYear && <span class="caption">{d.year}</span>}
+  </div>
+
+  <div class="event__body">
+    <p><Badge kind={upcoming ? 'upcoming' : 'past'} /></p>
+    <h3 class="subheading">{event.data.title}</h3>
+    {place && <p class="body-sm event__place">{place}</p>}
+    {hasBody && <div class="prose body-sm event__desc"><Content /></div>}
+    {
+      event.data.link && (
+        <p>
+          <a class="btn--text" href={event.data.link} rel="noopener">details / rsvp →</a>
+        </p>
+      )
+    }
+  </div>
+
+  {
+    event.data.image && (
+      <div class="event__image">
+        <ResponsiveArt
+          src={event.data.image}
+          alt={`${event.data.title} poster`}
+          widths={[320, 480, 640]}
+          sizes="(min-width: 48em) 12rem, 100vw"
+          loading="lazy"
+        />
+      </div>
+    )
+  }
+</article>

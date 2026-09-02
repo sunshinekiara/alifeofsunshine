@@ -1,0 +1,53 @@
+---
+/**
+ * /events — DESIGN-SYSTEM.md §7.5.
+ *
+ * Upcoming first, soonest first; then a PAST heading and past events newest first. Both groups
+ * are omitted when empty, and §7.5's empty state carries the page when there are no events at all.
+ */
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import EventCard from '../components/EventCard.astro';
+import { splitEvents } from '../lib/events';
+
+const events = await getCollection('event');
+const { upcoming, past } = splitEvents(events);
+const settings = await getEntry('siteConfig', 'site');
+const instagram = settings?.data.instagram ?? 'a_life_of_sunshine';
+---
+
+<Base
+  title="Events — A Life Of Sunshine"
+  description="Pop-ups and shows by Sunshine Kiara Bhandary."
+>
+  <div class="container section">
+    <h1 class="display-2">Events</h1>
+
+    {
+      events.length === 0 ? (
+        <p class="body-lg measure" style="margin-top: var(--space-5);">
+          no shows on the calendar right now — follow along on{' '}
+          <a href={`https://www.instagram.com/${instagram}/`} rel="noopener">instagram</a>{' '}
+          for the next one
+        </p>
+      ) : (
+        <>
+          {upcoming.length > 0 && (
+            <div class="events" style="margin-top: var(--space-6);">
+              {upcoming.map((e) => <EventCard event={e} />)}
+            </div>
+          )}
+
+          {past.length > 0 && (
+            <section style="margin-top: var(--section-gap);">
+              <h2 class="heading">Past</h2>
+              <div class="events" style="margin-top: var(--space-5);">
+                {past.map((e) => <EventCard event={e} />)}
+              </div>
+            </section>
+          )}
+        </>
+      )
+    }
+  </div>
+</Base>

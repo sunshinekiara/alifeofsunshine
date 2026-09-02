@@ -760,3 +760,60 @@ a:hover { color: var(--ink); }
   content: ''; position: absolute; left: 0; top: 0.6em;
   width: 8px; height: 8px; border: 1px solid var(--sage-deep); border-radius: 50%;
 }
+
+/* ---- Event cards (§7.5) ---- */
+.events { display: grid; }
+.event {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: var(--space-4);
+  border-top: 1px solid var(--line);
+  padding-block: var(--space-5);
+}
+.event__date { text-align: start; }
+.event__day {
+  display: block;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 2rem; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+/* A month-spanning range needs to wrap to two lines rather than blow the column (§7.5). */
+.event__day--spans { font-size: 1.125rem; line-height: 1.2; }
+.event__month { display: block; margin-top: var(--space-1); }
+.event__body > * + * { margin-top: var(--space-2); }
+.event__place { color: var(--ink-soft); }
+.event__desc { color: var(--ink-soft); }
+.event__image { border: 1px solid var(--line); background: var(--mat); position: relative; }
+.event__image picture { display: contents; }
+.event__image img { width: 100%; height: auto; object-fit: contain; display: block; }
+@media (max-width: 47.99em) {
+  .event__image { grid-column: 1 / -1; max-height: 40vh; }
+  .event__image img { max-height: 40vh; object-fit: contain; }
+}
+@media (min-width: 48em) {
+  .event--has-image { grid-template-columns: 4.5rem 1fr 12rem; }
+}
+
+/* §7.5 home slot — the soonest upcoming event as a one-line band above the footer. */
+.next-event {
+  background: var(--sage-tint);
+  color: var(--ink);
+  padding-block: var(--space-5);
+  margin-top: var(--section-gap);
+}
+.next-event__inner {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
+.next-event a { color: var(--ink); }
+.next-event .eyebrow { color: var(--ink); }
+
+/* §7.8 — the current section: --ink with a 2px --ink underline. On mobile the row's own bottom
+ * border is the baseline, so the underline sits on it. */
+.nav__links a.is-current {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--ink);
+  text-underline-offset: 0.5em;
+}

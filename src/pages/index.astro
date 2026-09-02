@@ -12,6 +12,7 @@ import { getCollection, getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Gallery from '../components/Gallery.astro';
 import CaseStudy from '../components/CaseStudy.astro';
+import { shortDate, splitEvents } from '../lib/events';
 import ResponsiveArt from '../components/ResponsiveArt.astro';
 import { detailAlt, sortArtworks } from '../lib/artwork';
 import { formatPrice } from '../lib/artwork';
@@ -35,6 +36,9 @@ const commissionTypes = (await getCollection('commissionType')).sort(
 const featuredCase = (await getCollection('caseStudy')).sort(
   (a, b) => (a.data.order ?? Infinity) - (b.data.order ?? Infinity),
 )[0];
+
+// §13 item 6 / §7.5 home slot — the single soonest upcoming event. Band omitted if none.
+const nextEvent = splitEvents(await getCollection('event')).upcoming[0];
 
 const greeting = hero.greeting ?? 'hi, i’m sunshine. i paint people, pets and the stories behind them.';
 const line = hero.line ?? 'scroll down for the work — dms are open if you want something made for someone you love.';
@@ -132,6 +136,25 @@ const line = hero.line ?? 'scroll down for the work — dms are open if you want
           <a class="btn--text" href="/commissions">all commissions →</a>
         </div>
         <CaseStudy caseStudy={featuredCase} />
+      </section>
+    )
+  }
+
+  {/* ---- 6. Next event band (§7.5 home slot). Omitted entirely when nothing is upcoming. ---- */}
+  {
+    nextEvent && (
+      <section class="next-event">
+        <div class="container next-event__inner">
+          <p class="eyebrow">Next pop-up</p>
+          <p class="body">
+            <a href="/events">{nextEvent.data.title}</a>
+          </p>
+          <p class="body-sm">
+            {[shortDate(nextEvent), nextEvent.data.venue, nextEvent.data.city]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+        </div>
       </section>
     )
   }
