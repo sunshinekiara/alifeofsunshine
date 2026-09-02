@@ -1,0 +1,176 @@
+---
+/**
+ * Artwork detail — DESIGN-SYSTEM.md §6.
+ *
+ * Order is §6.1's, top to bottom: back link, the artwork, label line, title, badges, buy block,
+ * story, details, related. Desktop (§6.2) splits it 7/5 with the image sticky while the right
+ * column scrolls. Every section is omitted when its data is missing, which today is most of
+ * them — the CSV has titles, images and six sets of print prices, and nothing else.
+ *
+ * The image here is ALWAYS the untrimmed file (§5.3): "The detail page always shows the
+ * untrimmed file. Ganga keeps its painted caption; Audrey keeps the yellow line that runs into
+ * her black border. The border is part of the work there."
+ */
+import { getCollection, getEntry, render } from 'astro:content';
+import { getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Badge from '../../components/Badge.astro';
+import BuyBlock from '../../components/BuyBlock.astro';
+import Gallery from '../../components/Gallery.astro';
+import ResponsiveArt from '../../components/ResponsiveArt.astro';
+import { detailAlt, detailLabel, hasPrints, sortArtworks } from '../../lib/artwork';
+
+export async function getStaticPaths() {
+  const artworks = await getCollection('artwork');
+  return artworks.map((artwork) => ({ params: { slug: artwork.id }, props: { artwork } }));
+}
+
+const { artwork } = Astro.props;
+const settings = await getEntry('siteConfig', 'site');
+
+const { Content } = await render(artwork);
+// An empty body means no story section at all (§6.1 item 8).
+const hasStory = Boolean(artwork.body && artwork.body.trim().length > 0);
+
+const label = detailLabel(artwork);
+const original = artwork.data.original;
+const showPrints = hasPrints(artwork);
+
+// §6.1 item 9 — the details list, each row omitted if absent, whole section omitted below 2 rows.
+const details = [
+  artwork.data.medium ? { term: 'medium', value: artwork.data.mediumDetail ?? artwork.data.medium } : null,
+  artwork.data.dimensions ? { term: 'size', value: artwork.data.dimensions } : null,
+  artwork.data.year ? { term: 'year', value: String(artwork.data.year) } : null,
+  showPrints && settings?.data.printPaper ? { term: 'print paper', value: settings.data.printPaper } : null,
+  showPrints && settings?.data.processingTime ? { term: 'processing', value: settings.data.processingTime } : null,
+].filter(Boolean) as { term: string; value: string }[];
+
+// §6.1 item 10 — 3 from the same category, excluding self, backfilled from featured.
+const all = await getCollection('artwork');
+const sameCategory = artwork.data.category
+  ? all.filter((a) => a.id !== artwork.id && a.data.category === artwork.data.category)
+  : [];
+const backfill = all.filter(
+  (a) => a.id !== artwork.id && a.data.featured && !sameCategory.some((s) => s.id === a.id),
+);
+const related = sortArtworks([...sameCategory, ...backfill]).slice(0, 3);
+const relatedHeading = artwork.data.category ? `More ${artwork.data.category}` : 'More like this';
+
+// §6.1 item 3 — this is the LCP element, so preload it with the same srcset the markup uses.
+const HERO_WIDTHS = [640, 960, 1280, 1600].filter((w) => w <= artwork.data.image.width);
+const HERO_SIZES = '(min-width: 64em) 58vw, 100vw';
+const preload = await getImage({
+  src: artwork.data.image,
+  widths: HERO_WIDTHS.length ? HERO_WIDTHS : [artwork.data.image.width],
+  sizes: HERO_SIZES,
+  format: 'avif',
+  quality: 60,
+});
+---
+
+<Base
+  title={`${artwork.data.title} — A Life Of Sunshine`}
+  description={artwork.data.altText ?? `${artwork.data.title}, by Sunshine Kiara Bhandary.`}
+>
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    type="image/avif"
+    imagesrcset={preload.srcSet.attribute}
+    imagesizes={HERO_SIZES}
+  />
+
+  <div class="container section detail">
+    {/* §6.1 item 2 */}
+    <p class="detail__back">
+      <a class="caption" href="/work">← work</a>
+    </p>
+
+    <div class="detail__grid">
+      {/* §6.1 item 3 — the untrimmed original, never the card derivative. */}
+      <figure class="detail__figure">
+        <ResponsiveArt
+          src={artwork.data.image}
+          alt={detailAlt(artwork)}
+          widths={[640, 960, 1280, 1600]}
+          sizes={HERO_SIZES}
+          avifQuality={60}
+          webpQuality={78}
+          loading="eager"
+          decoding="sync"
+          fetchpriority="high"
+        />
+      </figure>
+
+      <div class="detail__info">
+        {/* item 4 — size first, because size is what she sells on (rev 2). */}
+        {label && <p class="label detail__label">{label}</p>}
+
+        {/* item 5 — full title, never truncated here. */}
+        <h1 class="title" lang={artwork.data.titleLang !== 'en' ? artwork.data.titleLang : undefined}>
+          {artwork.data.title}
+        </h1>
+
+        {/* item 6 — omitted entirely when there is neither an original nor prints. */}
+        {
+          (original?.status || showPrints) && (
+            <p class="detail__badges">
+              {original?.status && <Badge kind={original.status} />}
+              {showPrints && <span class="caption">prints available</span>}
+            </p>
+          )
+        }
+
+        {/* item 7 */}
+        <div class="detail__buy">
+          <BuyBlock
+            artwork={artwork}
+            instagram={settings?.data.instagram ?? 'a_life_of_sunshine'}
+            shippingRegions={settings?.data.shippingRegions}
+            printPaper={settings?.data.printPaper}
+            processingTime={settings?.data.processingTime}
+          />
+        </div>
+
+        {/* item 8 — heading and all if the story is empty. */}
+        {
+          hasStory && (
+            <section class="detail__story">
+              <h2 class="heading">The story</h2>
+              <div class="prose body-lg measure">
+                <Content />
+              </div>
+            </section>
+          )
+        }
+
+        {/* item 9 — omitted below two rows. */}
+        {
+          details.length >= 2 && (
+            <section class="detail__details">
+              <dl class="details-list body-sm">
+                {details.map((d) => (
+                  <>
+                    <dt>{d.term}</dt>
+                    <dd>{d.value}</dd>
+                  </>
+                ))}
+              </dl>
+            </section>
+          )
+        }
+      </div>
+    </div>
+
+    {/* item 10 — full width below both columns. Omitted below 2 items. */}
+    {
+      related.length >= 2 && (
+        <section class="detail__related">
+          <h2 class="heading">{relatedHeading}</h2>
+          <Gallery artworks={related} noSpan={true} emptyText={null} />
+        </section>
+      )
+    }
+  </div>
+</Base>

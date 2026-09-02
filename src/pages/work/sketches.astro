@@ -1,0 +1,19 @@
+---
+// /work/sketches — §5.7 filter page. Empty until `medium` is filled in (it is blank for all 55
+// rows of artwork-metadata.csv), and §7.6 says a tab whose page has 0 items still renders.
+import { getCollection } from 'astro:content';
+import GalleryPage from '../../components/GalleryPage.astro';
+import { sortArtworks } from '../../lib/artwork';
+
+const artworks = sortArtworks(
+  (await getCollection('artwork')).filter((a) => a.data.medium === 'sketch'),
+);
+---
+<GalleryPage
+  title="Sketches — A Life Of Sunshine"
+  description="Sketches by Sunshine Kiara Bhandary."
+  heading="Sketches"
+  current="sketches"
+  artworks={artworks}
+  emptyText="nothing here yet — the paintings are on their way."
+/>

@@ -304,6 +304,11 @@ a:hover { color: var(--ink); }
 .cell {
   display: grid;
   grid-template-rows: auto max-content;
+  /* `start`, not the grid default of `stretch`: otherwise a taller cell elsewhere in the row
+     stretches this one, the auto row absorbs the extra height, and `aspect-ratio` turns that
+     into extra WIDTH so the frame overflows its own cell. Measured at 379px inside a 363px
+     cell before this. */
+  align-content: start;
   row-gap: var(--space-2);
   text-decoration: none;
   color: inherit;
@@ -494,3 +499,150 @@ a:hover { color: var(--ink); }
 /* §7.10 — a secondary button on the sage-tint band: --sage-tint hover would be invisible
  * against the band itself, so it lifts to --paper instead. Still --ink text and border. */
 .ig-band .btn--secondary:hover { background: var(--paper); color: var(--ink); }
+
+/* ---- Badges (§7.7). Nothing rounded; chips are detail-page only. ---- */
+.badge {
+  display: inline-block;
+  font-family: var(--font-text); font-weight: 600;
+  font-size: 0.6875rem; line-height: 1.6;
+  letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0;
+  vertical-align: middle;
+}
+.badge--available { background: var(--sage-tint); color: var(--sage-deep); }
+.badge--reserved  { background: var(--mat); color: var(--ink-soft); }
+.badge--sold      { background: var(--mat); color: var(--ink-muted); }
+.badge--upcoming  { background: var(--sage-tint); color: var(--sage-deep); }
+.badge--past      { background: var(--mat); color: var(--ink-muted); }
+.badge--new       { background: var(--sage-tint); color: var(--sage-deep); }
+
+/* ---- Filter tabs (§7.6) ---- */
+.filters { border-bottom: 1px solid var(--line); }
+.filters__list {
+  display: flex; gap: var(--space-5);
+  overflow-x: auto; scrollbar-width: none;
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+}
+.filters__list::-webkit-scrollbar { display: none; }
+.filters__tab {
+  display: inline-block;
+  font-size: var(--text-body-sm); font-weight: 500;
+  color: var(--ink-soft); text-decoration: none;
+  padding: var(--space-2) 0;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.filters__tab:hover { color: var(--ink); }
+.filters__tab.is-current { color: var(--ink); border-bottom-color: var(--ink); }
+@media (min-width: 64em) {
+  .filters__list { margin-inline: 0; padding-inline: 0; mask-image: none; overflow-x: visible; }
+}
+
+/* ---- Artwork detail (§6.1, §6.2) ---- */
+.detail__back { padding-block: var(--space-4); }
+.detail__grid { display: grid; gap: var(--space-6); }
+.detail__figure { margin: 0; position: relative; }
+.detail__figure picture { display: contents; }
+.detail__figure img {
+  width: auto; height: auto;
+  max-width: 100%;
+  max-height: 78vh;              /* §6.1 item 3 — room to see the title without scrolling */
+  object-fit: contain;
+  margin-inline: auto;
+}
+.detail__info > * + * { margin-top: var(--space-5); }
+.detail__label { margin-top: var(--space-6); }
+.detail__info .title { margin-top: var(--space-2); }
+.detail__badges { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.detail__story > .prose { margin-top: var(--space-4); }
+.detail__related { margin-top: var(--section-gap); }
+.detail__related > .gallery { margin-top: var(--space-5); }
+
+.details-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: var(--space-5);
+  row-gap: var(--space-2);
+}
+.details-list dt { color: var(--ink-muted); }
+.details-list dd { color: var(--ink); }
+
+@media (min-width: 64em) {
+  .detail__grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: start;
+  }
+  .detail__figure {
+    grid-column: 1 / span 7;
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-5));
+  }
+  .detail__figure img { max-height: calc(100vh - var(--nav-height) - var(--space-8)); }
+  .detail__info { grid-column: 8 / span 5; padding-left: var(--space-6); }
+  .detail__label { margin-top: 0; }
+}
+
+/* ---- Buy / enquire block (§7.2) ---- */
+.buy > * + * { margin-top: var(--space-5); }
+.buy__honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.buy__original { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-2); }
+.buy__row.is-gone .price-lg { color: var(--ink-soft); }
+.buy__on-request { color: var(--ink-soft); }
+.buy__actions {
+  display: grid; grid-template-columns: 1fr; gap: var(--space-3);
+  /* §2.3 / §14.1 — the straw button keeps its distance from the painting. */
+  margin-top: var(--space-6);
+}
+@media (min-width: 40em) { .buy__actions { grid-template-columns: 1fr 1fr; } }
+.buy__actions .btn { width: 100%; }
+.buy__trust { color: var(--ink-muted); }
+
+/* Prints table (§7.2). Native radios, 44px rows, selected row on --sage-tint. */
+.prints { margin-top: var(--space-2); border-top: 1px solid var(--line); }
+.prints__row { border-bottom: 1px solid var(--line); }
+.prints__label {
+  display: grid;
+  grid-template-columns: auto 3ch 1fr minmax(7ch, auto);
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-2);
+  cursor: pointer;
+}
+.prints__label input[type='radio'] {
+  accent-color: var(--ink);
+  width: 20px; height: 20px;
+  margin: 0;
+}
+.prints__size { font-weight: 500; }
+.prints__dims { color: var(--ink-muted); }
+.prints__price { text-align: right; min-width: 7ch; }
+.prints__row:has(input:checked) { background: var(--sage-tint); }
+.prints__row:has(input:focus-visible) { outline: var(--focus-ring); outline-offset: 2px; }
+.prints__note { margin-top: var(--space-2); }
+
+/* Print size guide (§6.3) */
+.size-guide { margin: var(--space-5) 0 0; max-width: 20rem; }
+.size-guide svg { width: 100%; height: auto; display: block; }
+.size-guide__paper { fill: none; stroke: var(--line); stroke-width: 0.5; }
+.size-guide__paper.is-offered { stroke: var(--line-strong); }
+.size-guide__human { fill: none; stroke: var(--line-strong); stroke-width: 0.5; }
+.size-guide__scale { fill: none; stroke: var(--line-strong); stroke-width: 0.5; }
+.size-guide__label {
+  fill: var(--ink-muted);
+  font-family: var(--font-text);
+  font-size: 5px;
+  stroke: none;
+}
+.size-guide figcaption { margin-top: var(--space-2); }
+
+/* §7.1 — the label row is reserved even when an artwork has no label yet, so rows stay level.
+ * §7.1 says no min-height hack is needed "by construction", and that is true once every work
+ * has a medium or dimensions. Today artwork-metadata.csv has neither for any of the 55, so 49
+ * cards would have no caption line and the rows would sit unevenly. Remove this once she has
+ * filled the CSV in. */
+.cell__label { min-height: 1lh; }

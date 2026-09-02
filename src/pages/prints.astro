@@ -1,0 +1,18 @@
+---
+// /prints — §5.7 "artworks with prints.available". The one grid that shows titles (§5.4, §14.4),
+// because buyers match them against her dm2buy listings.
+import { getCollection } from 'astro:content';
+import GalleryPage from '../components/GalleryPage.astro';
+import { hasPrints, sortArtworks } from '../lib/artwork';
+
+const artworks = sortArtworks((await getCollection('artwork')).filter(hasPrints));
+---
+<GalleryPage
+  title="Prints — A Life Of Sunshine"
+  description="Art prints A5 to A1, printed on pigmented paper with a matte finish."
+  heading="Prints"
+  current="prints"
+  artworks={artworks}
+  variant="shop"
+  emptyText="no prints listed yet — dms are open if there's one you want."
+/>

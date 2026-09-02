@@ -1,0 +1,92 @@
+---
+/**
+ * Print size guide — DESIGN-SYSTEM.md §6.3 (rev 2).
+ *
+ * "the five A-size rectangles nested from a shared bottom-left corner, to scale, each labelled
+ * at its top-right in `caption` `--ink-muted`, with a 30 cm scale bar and a 170 cm human
+ * silhouette outline beside A1 for reference. Sizes not offered for this artwork are drawn in
+ * `--line` (lighter) with no label."
+ *
+ * The viewBox is in centimetres, so every rectangle is literally to scale. Omitted by the
+ * caller when fewer than two sizes are offered.
+ */
+import { PRINT_DIMENSIONS, PRINT_SIZE_ORDER } from '../lib/artwork';
+import type { PrintSize } from '../lib/artwork';
+
+interface Props {
+  /** The sizes this artwork actually offers. */
+  offered: PrintSize[];
+}
+const { offered } = Astro.props;
+
+const HUMAN_CM = 170;
+const PAD = 4;
+const VB_H = HUMAN_CM + PAD * 2;
+const VB_W = 108;
+const floor = VB_H - PAD; // shared bottom-left corner
+
+/** Largest first, so the smaller rectangles draw on top of the bigger ones. */
+const rects = [...PRINT_SIZE_ORDER]
+  .reverse()
+  .map((size) => {
+    const [w, h] = PRINT_DIMENSIONS[size].cm.split(' × ').map(Number);
+    return { size, w, h, offered: offered.includes(size) };
+  });
+
+const humanX = 72;
+const headR = 10;
+---
+
+<figure class="size-guide">
+  <svg
+    viewBox={`0 0 ${VB_W} ${VB_H}`}
+    role="img"
+    aria-label={`Print sizes to scale beside a 170 cm person. Offered: ${offered.join(', ')}.`}
+  >
+    {/* A 170cm person, for scale. An outline only — this is a diagram, not artwork. */}
+    <g class="size-guide__human" aria-hidden="true">
+      <circle cx={humanX} cy={floor - HUMAN_CM + headR} r={headR} />
+      <path
+        d={`M ${humanX} ${floor - HUMAN_CM + headR * 2}
+            L ${humanX} ${floor - 62}
+            M ${humanX - 15} ${floor - 118}
+            L ${humanX + 15} ${floor - 118}
+            M ${humanX} ${floor - 62} L ${humanX - 12} ${floor}
+            M ${humanX} ${floor - 62} L ${humanX + 12} ${floor}`}
+      />
+    </g>
+
+    {
+      rects.map((r) => (
+        <rect
+          x={0}
+          y={floor - r.h}
+          width={r.w}
+          height={r.h}
+          class:list={['size-guide__paper', { 'is-offered': r.offered }]}
+        />
+      ))
+    }
+
+    {/* Labels at each offered rectangle's top-right. */}
+    {
+      rects
+        .filter((r) => r.offered)
+        .map((r) => (
+          <text x={r.w + 2} y={floor - r.h + 5} class="size-guide__label">
+            {r.size}
+          </text>
+        ))
+    }
+
+    {/* 30 cm scale bar. */}
+    <g class="size-guide__scale" aria-hidden="true">
+      <path d={`M 0 ${floor + 3} L 30 ${floor + 3} M 0 ${floor + 1} L 0 ${floor + 5} M 30 ${floor + 1} L 30 ${floor + 5}`} />
+      <text x={33} y={floor + 5} class="size-guide__label">30 cm</text>
+    </g>
+  </svg>
+
+  <figcaption class="caption">
+    every size to scale, next to a 170 cm person
+  </figcaption>
+</figure>

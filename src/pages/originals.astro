@@ -1,0 +1,21 @@
+---
+// /originals — §5.7: artworks with `original.forSale` or an `original.status`. Sold pieces stay
+// listed (brief §8: they prove demand). Empty until she fills in the originals columns.
+import { getCollection } from 'astro:content';
+import GalleryPage from '../components/GalleryPage.astro';
+import { sortArtworks } from '../lib/artwork';
+
+const artworks = sortArtworks(
+  (await getCollection('artwork')).filter(
+    (a) => a.data.original?.forSale || a.data.original?.status,
+  ),
+);
+---
+<GalleryPage
+  title="Originals — A Life Of Sunshine"
+  description="One-of-a-kind canvas originals by Sunshine Kiara Bhandary."
+  heading="Originals"
+  current="originals"
+  artworks={artworks}
+  emptyText="no originals listed yet — dms are open if you want to ask about one."
+/>

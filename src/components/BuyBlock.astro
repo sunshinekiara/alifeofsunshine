@@ -1,0 +1,113 @@
+---
+/**
+ * Buy / enquire block — DESIGN-SYSTEM.md §7.2.
+ *
+ * One <form> so the size a visitor picks with zero JavaScript is posted with the enquiry. The
+ * Instagram action is a plain <a>. §7.2's phase-2 contract: the primary slot stays exactly one
+ * interactive element at 48px and full slot width — only its label changes when the cart lands.
+ *
+ * The secondary "ENQUIRE INSTEAD" slot is not here yet: the enquiry form is step 7, and a button
+ * pointing at an #enquire anchor that does not exist would be worse than one button. §7.2's own
+ * empty case already covers the shape.
+ */
+import PrintSizeGuide from './PrintSizeGuide.astro';
+import Badge from './Badge.astro';
+import { PRINT_DIMENSIONS, formatPrice, hasPrints, orderedSizes } from '../lib/artwork';
+import type { Artwork } from '../lib/artwork';
+
+interface Props {
+  artwork: Artwork;
+  instagram: string;
+  shippingRegions?: string;
+  printPaper?: string;
+  processingTime?: string;
+}
+const { artwork, instagram, shippingRegions, printPaper, processingTime } = Astro.props;
+
+const original = artwork.data.original;
+const showOriginal = Boolean(original?.forSale || original?.status);
+const sizes = orderedSizes(artwork);
+const showPrints = hasPrints(artwork);
+const gone = original?.status === 'sold' || original?.status === 'reserved';
+
+// §7.2 — the primary label changes with state, the geometry never does.
+const primaryLabel = !showOriginal && !showPrints
+  ? 'Ask about this piece'
+  : gone
+    ? 'Ask about similar work'
+    : 'DM to order';
+
+const dmHref = `https://ig.me/m/${instagram}`;
+
+// §7.2 trust line, built from siteConfig. One line, wraps to two on mobile.
+const trustParts = [
+  'prepaid only',
+  shippingRegions ? `ships ${shippingRegions}` : null,
+  showOriginal ? 'no returns on originals' : null,
+].filter(Boolean);
+const showTrust = (showOriginal || showPrints) && trustParts.length > 0;
+
+const printCaption = [printPaper, processingTime ? `ships in ${processingTime}` : null]
+  .filter(Boolean)
+  .join(' · ');
+---
+
+<form class="buy" name="artwork-enquiry" method="POST" data-netlify="true">
+  {/* Netlify Forms plumbing. The visible enquiry fields arrive at step 7. */}
+  <input type="hidden" name="form-name" value="artwork-enquiry" />
+  <input type="hidden" name="context" value={artwork.data.title.slice(0, 120)} />
+  <input type="hidden" name="context-slug" value={artwork.id} />
+  <p class="buy__honeypot"><label>don’t fill this in <input name="bot-field" /></label></p>
+
+  {
+    showOriginal && (
+      <div class:list={['buy__row', { 'is-gone': gone }]}>
+        <p class="eyebrow">The original</p>
+        <p class="buy__original">
+          {original?.price !== undefined ? (
+            <span class="price-lg">{formatPrice(original.price)}</span>
+          ) : original?.forSale ? (
+            <span class="body-sm buy__on-request">price on request</span>
+          ) : null}
+          {original?.status && <Badge kind={original.status} />}
+        </p>
+      </div>
+    )
+  }
+
+  {
+    showPrints && (
+      <div class="buy__row">
+        <p class="eyebrow">Prints</p>
+        <ul class="prints">
+          {sizes.map((s, i) => (
+            <li class="prints__row">
+              <label class="prints__label">
+                {/* Native radio, restyled. Smallest size checked by default (§7.2). */}
+                <input type="radio" name="size" value={s.size} checked={i === 0} />
+                <span class="prints__size">{s.size}</span>
+                <span class="prints__dims body-sm">{PRINT_DIMENSIONS[s.size].cm} cm</span>
+                <span class="prints__price price">
+                  {s.price !== undefined ? formatPrice(s.price) : '—'}
+                </span>
+              </label>
+            </li>
+          ))}
+        </ul>
+        {printCaption && <p class="caption prints__note">{printCaption}</p>}
+        {/* §6.3 — omitted below two sizes. */}
+        {sizes.length >= 2 && <PrintSizeGuide offered={sizes.map((s) => s.size)} />}
+      </div>
+    )
+  }
+
+  <div class="buy__actions">
+    <a class="btn btn--primary" href={dmHref} rel="noopener">{primaryLabel}</a>
+  </div>
+
+  {showTrust && (
+    <p class="caption buy__trust">
+      {trustParts.join(' · ')} · <a href="/policies">policies</a>
+    </p>
+  )}
+</form>

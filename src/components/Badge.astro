@@ -1,0 +1,12 @@
+---
+/**
+ * Badges — DESIGN-SYSTEM.md §7.7. Chips are for the detail page; cards append to the label
+ * instead (§5.4), so nothing here appears in the gallery.
+ */
+interface Props {
+  kind: 'available' | 'reserved' | 'sold' | 'upcoming' | 'past' | 'new';
+}
+const { kind } = Astro.props;
+const label = kind;
+---
+<span class:list={['badge', `badge--${kind}`]}>{label}</span>

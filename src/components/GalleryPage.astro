@@ -1,0 +1,48 @@
+---
+/**
+ * The shared shell behind /work, its filters, /prints and /originals — DESIGN-SYSTEM.md §5.7.
+ * Same gallery component, different data and one different caption variant.
+ */
+import Base from '../layouts/Base.astro';
+import FilterTabs from './FilterTabs.astro';
+import Gallery from './Gallery.astro';
+import type { Artwork } from '../lib/artwork';
+
+interface Props {
+  title: string;
+  heading: string;
+  description?: string;
+  current: string;
+  artworks: Artwork[];
+  variant?: 'portfolio' | 'shop';
+  /** §5.8 — her line when a filter has nothing in it. */
+  emptyText?: string;
+  intro?: string;
+}
+
+const {
+  title,
+  heading,
+  description,
+  current,
+  artworks,
+  variant = 'portfolio',
+  emptyText,
+  intro,
+} = Astro.props;
+---
+
+<Base title={title} description={description}>
+  <div class="container section">
+    <h1 class="display-2">{heading}</h1>
+    {intro && <p class="body-lg measure" style="margin-top: var(--space-4);">{intro}</p>}
+
+    <div style="margin-top: var(--space-5);">
+      <FilterTabs current={current} />
+    </div>
+
+    <div style="margin-top: var(--space-6);">
+      <Gallery artworks={artworks} variant={variant} emptyText={emptyText} />
+    </div>
+  </div>
+</Base>

@@ -53,6 +53,9 @@ const shippingRegions = settings?.data.shippingRegions;
       type="font/woff2"
       crossorigin
     />
+
+    {/* §6.1 — the artwork detail page preloads its LCP image here with imagesrcset. */}
+    <slot name="head" />
   </head>
 
   <body>

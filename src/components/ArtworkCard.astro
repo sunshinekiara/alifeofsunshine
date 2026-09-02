@@ -81,7 +81,11 @@ const shopLabel = sizeList.length
       <>
         {/* §5.4 — the title is the link's accessible name even though it is not shown. */}
         <span class="visually-hidden">{artwork.data.title}</span>
-        {label && <span class="cell__label label">{label}</span>}
+        {/* Rendered even when empty. §7.1 promises every card in a grid has the same caption
+            height "by construction"; that holds once every work has a medium or dimensions, but
+            today only 6 of 55 produce a label, and a missing element let the shorter cells
+            stretch and knock the row lines out of true. */}
+        <span class="cell__label label">{label}</span>
       </>
     )
   }

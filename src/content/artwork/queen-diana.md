@@ -3,9 +3,15 @@ title: Queen Diana
 image: ../../assets/art/queen-diana.jpg
 featured: true
 order: 2
-# DESIGN-SYSTEM.md §0 lists this work as carrying a dark painted border, and the masters script
-# measured a flat edge 5.8% deep. `trim` is left unset so the §5.3 default of 4% applies.
+# frame/trim: §0 lists this work as having a dark painted border; the masters script
+# measured its flat edge at 5.8%. §5.3's 4% default left a visible 1.9% strip, so the trim is
+# seeded from the measurement like the other framed works. Thumbnails only.
 frame: dark
+trim:
+  top: 6
+  right: 6
+  bottom: 6
+  left: 6
 prints:
   available: true
   sizes:

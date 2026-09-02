@@ -1,0 +1,37 @@
+---
+/**
+ * Filter tabs — DESIGN-SYSTEM.md §7.6 and §5.7. Filters are separate static pages, not
+ * JavaScript. A tab whose page would have zero items is still rendered; the destination shows
+ * its own empty state (§7.6).
+ */
+interface Props {
+  current: string;
+}
+const { current } = Astro.props;
+
+const tabs = [
+  { slug: 'all', label: 'all', href: '/work' },
+  { slug: 'canvas', label: 'canvas', href: '/work/canvas' },
+  { slug: 'digital', label: 'digital', href: '/work/digital' },
+  { slug: 'sketches', label: 'sketches', href: '/work/sketches' },
+  { slug: 'prints', label: 'prints', href: '/prints' },
+  { slug: 'originals', label: 'originals', href: '/originals' },
+];
+---
+<nav class="filters" aria-label="filter">
+  <ul class="filters__list">
+    {
+      tabs.map((t) => (
+        <li>
+          <a
+            href={t.href}
+            class:list={['filters__tab', { 'is-current': t.slug === current }]}
+            aria-current={t.slug === current ? 'page' : undefined}
+          >
+            {t.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>

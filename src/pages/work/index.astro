@@ -1,0 +1,15 @@
+---
+// /work — the whole collection (§5.7 "all").
+import { getCollection } from 'astro:content';
+import GalleryPage from '../../components/GalleryPage.astro';
+import { sortArtworks } from '../../lib/artwork';
+
+const artworks = sortArtworks(await getCollection('artwork'));
+---
+<GalleryPage
+  title="Work — A Life Of Sunshine"
+  description="Paintings, digital work and commissions by Sunshine Kiara Bhandary."
+  heading="Work"
+  current="all"
+  artworks={artworks}
+/>
