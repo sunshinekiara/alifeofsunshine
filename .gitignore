@@ -1,0 +1,51 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+
+# ---- A Life Of Sunshine: project-specific ----
+# Sunshine's full-resolution source art. ~750MB, and the art book PDF is 134MB,
+# which is over GitHub's 100MB per-file limit. These stay on disk as the archive.
+# Web-sized masters generated from them live in src/assets/art/ and ARE committed.
+images for website/
+
+# Reference-only previews made for the design consult. Not site source.
+_preview/
+
+# Scaffolding leftover
+CLAUDE-astro-generated.md
+
+# ---- Internal planning docs: local only, never published ----
+# The repo is PUBLIC (Netlify free tier allows only one contributor on private
+# repos, and the CMS means Sunshine and Rachit are both contributors by design).
+# These stay on disk so Claude Code can read them, but are not pushed:
+# business analysis, pricing strategy, her contact details, build notes.
+brief.md
+DESIGN-SYSTEM.md
+BUILD-STEPS.md
+STACK-EXPLAINED.md
+CLAUDE.md
+sunlife.md
+artwork-metadata.csv
+refs/
+brand/
