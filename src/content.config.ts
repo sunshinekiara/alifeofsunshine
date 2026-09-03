@@ -212,6 +212,9 @@ const page = defineCollection({
       /** §13 /commissions — the numbered "HOW IT WORKS" steps on the sage band, in her words.
        *  Taken verbatim from the Process Overview page of her art book. */
       steps: z.array(z.object({ title: z.string(), detail: z.string().optional() })).default([]),
+      /** /commissions — the applications she is open to, verbatim from the "What Now" page of
+       *  her art archive PDF. Nine entries; the site's three commission types are a subset. */
+      openTo: z.array(z.string()).default([]),
     }),
 });
 
