@@ -1,5 +1,6 @@
 ---
 title: The Fire Still Burns
+altText: "A close portrait of a blue-skinned woman with large gold hoop earrings, against a night-blue ground scattered with falling points of light."
 image: ../../assets/art/the-fire-still-burns.jpg
 featured: true
 order: 3

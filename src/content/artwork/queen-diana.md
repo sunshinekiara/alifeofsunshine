@@ -1,5 +1,6 @@
 ---
 title: Queen Diana
+altText: "A punk-styled portrait of Princess Diana in a crown and sunglasses, wearing a boldly patterned jacket, against a scratched pink and magenta ground scattered with hearts."
 image: ../../assets/art/queen-diana.jpg
 featured: true
 order: 2
