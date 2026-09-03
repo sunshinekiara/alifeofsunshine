@@ -13,7 +13,7 @@ backend:
   repo: sunshinekiara/alifeofsunshine
   branch: main
 
-site_url: https://funny-nougat-cdd057.netlify.app
+site_url: https://alifeofsunshine.com
 
 # Fallback for uploads from a collection that does not set its own.
 media_folder: src/assets/art

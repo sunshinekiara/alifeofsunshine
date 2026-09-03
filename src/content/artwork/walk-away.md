@@ -1,5 +1,5 @@
 ---
-title: Walk Away
+title: "its everything right now"
 altText: "A woman with a long dark braid standing at a stove, a tall flame rising from the pan, in a kitchen of blue tile."
 image: "../../assets/art/walk-away.jpg"
 prints:

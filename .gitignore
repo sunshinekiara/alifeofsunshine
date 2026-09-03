@@ -57,3 +57,7 @@ BUILD-LOG.md
 # Lighthouse reports, run ad hoc during the accessibility pass
 lh-*.json
 lh_*.json
+
+# Her 206MB art archive PDF — over GitHub's 100MB file limit. Source material, not site content.
+A Life of Sunshine- art archives.pdf
+*.pdf
